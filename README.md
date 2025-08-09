@@ -1,17 +1,17 @@
-# godot-lsp.nvim
+# 🤖 godot-lsp.nvim
 
 A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript, providing features like go-to-definition, hover documentation, code actions, diagnostics, and completion. Supports TreeSitter syntax highlighting and automatic buffer attachment for GDScript files.
 
-## Features
+## ✨ Features
 
-- **LSP Integration**: Connects to Godot's LSP server via `ncat` for GDScript autocompletion, definitions, hover info, code actions, and diagnostics.
-- **TreeSitter Support**: Enables syntax highlighting for GDScript files using `nvim-treesitter`.
-- **Automatic Buffer Attachment**: Attaches all GDScript buffers to the LSP client automatically.
-- **Customizable Keymaps**: Configurable key bindings for LSP actions like go-to-definition, hover, and diagnostics navigation.
-- **User Commands**: Commands to start the LSP, check server status, and attach buffers manually.
-- **Debug Logging**: Optional logging to `~/.cache/nvim/godot-lsp.log` for troubleshooting.
+- 🔌 **LSP Integration**: Connects to Godot's LSP server via `ncat` for GDScript autocompletion, definitions, hover info, code actions, and diagnostics.
+- 🌳 **TreeSitter Support**: Enables syntax highlighting for GDScript files using `nvim-treesitter`.
+- ⚡ **Automatic Buffer Attachment**: Attaches all GDScript buffers to the LSP client automatically.
+- ⌨️ **Customizable Keymaps**: Configurable key bindings for LSP actions like go-to-definition, hover, and diagnostics navigation.
+- 🛠 **User Commands**: Commands to start the LSP, check server status, and attach buffers manually.
+- 📜 **Debug Logging**: Optional logging to `~/.cache/nvim/godot-lsp.log` for troubleshooting.
 
-## Requirements
+## 📦 Requirements
 
 - Neovim 0.9.0 or later
 - `ncat` (Netcat) installed (`brew install ncat` on macOS, `apt install ncat` on Debian/Ubuntu)
@@ -21,7 +21,7 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 - Optional: [fidget.nvim](https://github.com/j-hui/fidget.nvim) for LSP progress notifications
 - Optional: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for file navigation
 
-## Installation
+## 📥 Installation
 
 Install using your preferred Neovim package manager.
 
@@ -75,7 +75,7 @@ Ensure the `gdscript` parser is installed:
 :TSInstall gdscript
 ```
 
-## Usage
+## 🚀 Usage
 
 1. Start Godot with LSP enabled:
    ```bash
@@ -95,13 +95,13 @@ Ensure the `gdscript` parser is installed:
    - `[d`: Go to previous diagnostic (`diagnostic/goto_prev`).
 4. Diagnostics appear as virtual text, signs, and underlines.
 
-### Commands
+### 🛠 Commands
 
 - `:GodotLspStart`: Start the Godot LSP client manually.
 - `:GodotLspStatus`: Check if the Godot LSP server is reachable at `localhost:6005`.
 - `:GodotLspAttachAll`: Attach all loaded GDScript buffers to the LSP client.
 
-### Configuration
+### ⚙ Configuration
 
 Customize the plugin by passing options to `setup`:
 
@@ -136,7 +136,7 @@ keymaps = {
 
 Enable `debug_logging = true` to write debug messages (e.g., buffer attachment, TreeSitter status) to `~/.cache/nvim/godot-lsp.log`. Useful for troubleshooting.
 
-## Troubleshooting
+## 🐞 Troubleshooting
 
 - **LSP not starting**:
   - Ensure Godot is running with `--lsp` (`godot --editor --lsp --verbose`).
@@ -158,10 +158,10 @@ Enable `debug_logging = true` to write debug messages (e.g., buffer attachment, 
 - **Crashes during completion**:
   - Avoid triggering completion while running a game in the editor, as it may crash.[](https://github.com/godotengine/godot/issues/102036)
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! Submit issues or pull requests to [github.com/username/godot-lsp.nvim](https://github.com/username/godot-lsp.nvim).
 
-## License
+## 📜 License
 
 MIT License
