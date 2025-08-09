@@ -93,6 +93,12 @@ local function setup_godot_lsp(user_config)
   local config = vim.tbl_deep_extend("force", default_config, user_config or {})
   local lsp_name = "godot_lsp"
 
+  -- Suppress fidget.nvim warnings
+  local ok_fidget, fidget = pcall(require, "fidget")
+  if ok_fidget then
+    fidget.suppress_notification_for(lsp_name)
+  end
+
   -- Test ncat connection
   local host, port = config.cmd[2], config.cmd[3]
   if not test_ncat_connection(host, port) then
@@ -193,8 +199,8 @@ local function setup_godot_lsp(user_config)
   end
 end
 
--- Ensure filetype is set for .gd files
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+-- Ensure filetype and TreeSitter highlighting for .gd files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
   pattern = "*.gd",
   callback = function(args)
     local bufnr = args.buf
@@ -207,7 +213,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
       print("TreeSitter status for buffer " .. bufnr .. ": " .. vim.inspect(ts_status))
       if ts_status and not ts_status.enable then
         print("Enabling TreeSitter highlighting for buffer " .. bufnr)
-        ts.setup { highlight = { enable = true } }
+        ts.setup { highlight = { enable = true, additional_vim_regex_highlighting = false } }
       end
       local parser_ok, _ = pcall(vim.treesitter.start, bufnr, "gdscript")
       if not parser_ok then
