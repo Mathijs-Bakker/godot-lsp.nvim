@@ -1,10 +1,11 @@
 # 🤖 godot-lsp.nvim
 
-A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript, providing features like go-to-definition, hover documentation, code actions, diagnostics, and completion. Supports TreeSitter syntax highlighting and automatic buffer attachment for GDScript files.
+A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript, providing features like go-to-definition, hover documentation, code actions, diagnostics, and completion across multiple buffers. Supports TreeSitter syntax highlighting and automatic LSP attachment for all open GDScript buffers.
 
 ## ✨ Features
 
 - 🔌 **LSP Integration**: Connects to Godot's LSP server via `ncat` for GDScript autocompletion, definitions, hover info, code actions, and diagnostics.
+- 📄 **Multi-Buffer Support**: Seamlessly attaches multiple GDScript buffers to the same LSP client, enabling consistent LSP features across all open files.
 - 🌳 **TreeSitter Support**: Enables syntax highlighting for GDScript files using `nvim-treesitter`.
 - ⚡ **Automatic Buffer Attachment**: Attaches all GDScript buffers to the LSP client automatically.
 - ⌨️ **Customizable Keymaps**: Configurable key bindings for LSP actions like go-to-definition, hover, and diagnostics navigation.
