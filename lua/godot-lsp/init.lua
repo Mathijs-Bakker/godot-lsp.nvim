@@ -10,7 +10,13 @@ local default_config = {
   cmd = { "ncat", "localhost", "6005" }, -- Connect to Godot's LSP port
   filetypes = { "gdscript" },
   root_dir = function(fname)
-    return util.root_pattern "project.godot"(fname) or util.path.dirname(fname)
+    local root = util.root_pattern "project.godot"(fname)
+    if root then
+      print("Resolved root_dir: " .. root)
+      return root
+    end
+    print("No project.godot found, falling back to file directory: " .. util.path.dirname(fname))
+    return util.path.dirname(fname)
   end,
   settings = {},
   skip_godot_check = true, -- Skip pgrep check since manual ncat works
@@ -37,6 +43,21 @@ local function test_ncat_connection(host, port)
   return result == ""
 end
 
+-- Attach buffer to LSP client
+local function attach_buffer_to_client(bufnr, client_id)
+  if vim.bo[bufnr].filetype == "gdscript" and vim.api.nvim_buf_is_loaded(bufnr) then
+    vim.lsp.buf_attach_client(bufnr, client_id)
+    print(
+      "Attached buffer "
+        .. bufnr
+        .. " ("
+        .. vim.api.nvim_buf_get_name(bufnr)
+        .. ") to Godot LSP client ID "
+        .. client_id
+    )
+  end
+end
+
 -- Start or attach to the LSP client
 local function setup_godot_lsp(user_config)
   local config = vim.tbl_deep_extend("force", default_config, user_config or {})
@@ -60,12 +81,7 @@ local function setup_godot_lsp(user_config)
     local client = vim.lsp.get_client_by_id(godot_lsp_client_id)
     if client then
       print("Reusing existing Godot LSP client with ID " .. godot_lsp_client_id)
-      -- Attach current buffer to existing client
-      local bufnr = vim.api.nvim_get_current_buf()
-      if vim.bo[bufnr].filetype == "gdscript" then
-        vim.lsp.buf_attach_client(bufnr, godot_lsp_client_id)
-        print("Attached buffer " .. bufnr .. " to Godot LSP client ID " .. godot_lsp_client_id)
-      end
+      attach_buffer_to_client(vim.api.nvim_get_current_buf(), godot_lsp_client_id)
       return
     end
   end
@@ -84,7 +100,16 @@ local function setup_godot_lsp(user_config)
       settings = config.settings,
       capabilities = vim.tbl_deep_extend("force", vim.lsp.protocol.make_client_capabilities(), config.capabilities),
       on_attach = function(client, bufnr)
-        print("Godot LSP connected for buffer " .. bufnr .. " with client ID " .. client.id .. " on port " .. port)
+        print(
+          "Godot LSP connected for buffer "
+            .. bufnr
+            .. " ("
+            .. vim.api.nvim_buf_get_name(bufnr)
+            .. ") with client ID "
+            .. client.id
+            .. " on port "
+            .. port
+        )
         -- Add default LSP mappings
         vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
         local opts = { buffer = bufnr, noremap = true, silent = true }
@@ -118,7 +143,7 @@ local function setup_godot_lsp(user_config)
   godot_lsp_client_id = vim.lsp.start {
     name = lsp_name,
     cmd = config.cmd,
-    root_dir = config.root_dir(),
+    root_dir = config.root_dir(vim.api.nvim_buf_get_name(0)),
     capabilities = config.capabilities,
     on_error = function(err)
       print("Godot LSP client error: " .. vim.inspect(err))
@@ -126,6 +151,8 @@ local function setup_godot_lsp(user_config)
     on_init = function(client)
       print("Godot LSP client initialized with ID " .. client.id)
       godot_lsp_client_id = client.id
+      -- Attach current buffer
+      attach_buffer_to_client(vim.api.nvim_get_current_buf(), client.id)
     end,
   }
 
@@ -178,10 +205,7 @@ vim.api.nvim_create_user_command("GodotLspAttachAll", function()
     return
   end
   for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.bo[bufnr].filetype == "gdscript" and vim.api.nvim_buf_is_loaded(bufnr) then
-      vim.lsp.buf_attach_client(bufnr, godot_lsp_client_id)
-      print("Attached buffer " .. bufnr .. " to Godot LSP client ID " .. godot_lsp_client_id)
-    end
+    attach_buffer_to_client(bufnr, godot_lsp_client_id)
   end
 end, {})
 
