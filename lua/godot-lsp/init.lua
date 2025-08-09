@@ -7,13 +7,21 @@ local util = require "lspconfig.util"
 
 -- Default configuration for Godot LSP
 local default_config = {
-  cmd = { "ncat", "localhost", "6005" }, -- Connect to Godot's LSP port
+  cmd = { "ncat", "--sh-exec", "ncat localhost 6005", "--no-shutdown" }, -- Ensure persistent connection
   filetypes = { "gdscript" },
   root_dir = function(fname)
     return util.root_pattern("project.godot", ".git")(fname) or util.path.dirname(fname)
   end,
   settings = {},
   skip_godot_check = true, -- Skip pgrep check since manual ncat works
+  capabilities = {
+    textDocument = {
+      completion = { completionItem = { snippetSupport = true } },
+      definition = { linkSupport = true },
+      hover = { contentFormat = { "markdown", "plaintext" } },
+      publishDiagnostics = { relatedInformation = true },
+    },
+  },
 }
 
 -- Test ncat connection
@@ -31,7 +39,8 @@ local function setup_godot_lsp(user_config)
   local lsp_name = "godot_lsp"
 
   -- Test ncat connection
-  local host, port = config.cmd[2], config.cmd[3]
+  local host = config.cmd[2] == "--sh-exec" and "localhost" or config.cmd[2]
+  local port = config.cmd[2] == "--sh-exec" and config.cmd[4] or config.cmd[3]
   if not test_ncat_connection(host, port) then
     print(
       string.format(
@@ -55,14 +64,22 @@ local function setup_godot_lsp(user_config)
       filetypes = config.filetypes,
       root_dir = config.root_dir,
       settings = config.settings,
+      capabilities = vim.lsp.protocol.make_client_capabilities(),
       on_attach = function(client, bufnr)
-        print("Godot LSP connected for buffer " .. bufnr .. " on port " .. config.cmd[3])
+        print("Godot LSP connected for buffer " .. bufnr .. " on port " .. port)
         -- Add default LSP mappings
         vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
         local opts = { buffer = bufnr, noremap = true, silent = true }
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
         vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
         vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+        -- Enable diagnostics
+        vim.diagnostic.config {
+          virtual_text = true,
+          signs = true,
+          underline = true,
+          update_in_insert = false,
+        }
       end,
       on_error = function(err)
         print("Godot LSP error: " .. vim.inspect(err))
@@ -83,17 +100,17 @@ local function setup_godot_lsp(user_config)
     name = lsp_name,
     cmd = config.cmd,
     root_dir = config.root_dir(),
+    capabilities = config.capabilities,
     on_error = function(err)
       print("Godot LSP client error: " .. vim.inspect(err))
+    end,
+    on_init = function(client)
+      print("Godot LSP client initialized with ID " .. client.id)
     end,
   }
 
   if not client_id then
-    print(
-      "Failed to start Godot LSP client. Ensure 'ncat' is installed and Godot is running on port "
-        .. config.cmd[3]
-        .. "."
-    )
+    print("Failed to start Godot LSP client. Ensure 'ncat' is installed and Godot is running on port " .. port .. ".")
   else
     print("Godot LSP client started with ID " .. client_id)
   end
@@ -108,7 +125,7 @@ vim.api.nvim_create_autocmd("FileType", {
       if not success then
         print("Error starting Godot LSP for GDScript buffer: " .. vim.inspect(err))
       end
-    end, 500) -- Increased delay to 500ms to ensure initialization
+    end, 1000) -- Increased delay to 1000ms to ensure initialization
   end,
 })
 
@@ -121,7 +138,9 @@ vim.api.nvim_create_user_command("GodotLspStart", function()
 end, {})
 
 vim.api.nvim_create_user_command("GodotLspStatus", function()
-  local host, port = default_config.cmd[2], default_config.cmd[3]
+  local host, port =
+    default_config.cmd[2] == "--sh-exec" and "localhost" or default_config.cmd[2],
+    default_config.cmd[2] == "--sh-exec" and default_config.cmd[4] or default_config.cmd[3]
   if test_ncat_connection(host, port) then
     print(string.format("Godot LSP server is reachable at %s:%s.", host, port))
   else
@@ -129,10 +148,9 @@ vim.api.nvim_create_user_command("GodotLspStatus", function()
   end
 end, {})
 
--- Expose setup function for user configuration (do not auto-start LSP)
+-- Expose setup function for user configuration
 return {
   setup = function(user_config)
-    -- Merge user config but do not start LSP immediately
     default_config = vim.tbl_deep_extend("force", default_config, user_config or {})
     print "Godot LSP plugin configured. LSP will start when a GDScript file is opened."
   end,
