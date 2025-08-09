@@ -32,7 +32,7 @@ Add to your `init.lua`:
 ```lua
 require("lazy").setup({
   {
-    "username/godot-lsp.nvim",
+    "Mathijs-Bakker/godot-lsp.nvim",
     config = function()
       require("godot-lsp").setup({
         skip_godot_check = true, -- Skip Godot process check
@@ -160,7 +160,7 @@ Enable `debug_logging = true` to write debug messages (e.g., buffer attachment, 
 
 ## 🤝 Contributing
 
-Contributions are welcome! Submit issues or pull requests to [github.com/username/godot-lsp.nvim](https://github.com/username/godot-lsp.nvim).
+Contributions are welcome! Submit issues or pull requests to [github.com/Mathijs-Bakker/godot-lsp.nvim](https://github.com/Mathijs-Bakker/godot-lsp.nvim).
 
 ## 📜 License
 
