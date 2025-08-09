@@ -200,6 +200,14 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     local bufnr = args.buf
     vim.bo[bufnr].filetype = "gdscript"
     print("Set filetype to gdscript for buffer " .. bufnr .. " (" .. vim.api.nvim_buf_get_name(bufnr) .. ")")
+    -- Force TreeSitter highlighting
+    local ok, ts = pcall(require, "nvim-treesitter.configs")
+    if ok then
+      print("TreeSitter status for buffer " .. bufnr .. ": " .. vim.inspect(ts.get_module "highlight"))
+      vim.treesitter.start(bufnr, "gdscript")
+    else
+      print("nvim-treesitter not loaded for buffer " .. bufnr)
+    end
   end,
 })
 
