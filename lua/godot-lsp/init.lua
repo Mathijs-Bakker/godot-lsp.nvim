@@ -1,3 +1,4 @@
+-- lua/godot-lsp/init.lua
 local ok, lspconfig = pcall(require, "lspconfig")
 if not ok then
   print "Error: nvim-lspconfig is not installed or failed to load. Please install it to use godot-lsp.nvim."
@@ -92,12 +93,6 @@ end
 local function setup_godot_lsp(user_config)
   local config = vim.tbl_deep_extend("force", default_config, user_config or {})
   local lsp_name = "godot_lsp"
-
-  -- Suppress fidget.nvim warnings
-  local ok_fidget, fidget = pcall(require, "fidget")
-  if ok_fidget then
-    fidget.suppress_notification_for(lsp_name)
-  end
 
   -- Test ncat connection
   local host, port = config.cmd[2], config.cmd[3]
@@ -278,7 +273,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufReadPost" }, {
           print("Error starting Godot LSP for GDScript buffer: " .. vim.inspect(err))
         end
       end
-    end, 1500) -- 1500ms delay to ensure filetype is set
+    end, 100) -- Reduced delay to 100ms for faster response
   end,
 })
 
