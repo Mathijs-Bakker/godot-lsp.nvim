@@ -43,7 +43,7 @@ local function setup_godot_lsp(user_config)
     return
   end
 
-  -- Check if lspconfig supports setup for custom LSP
+  -- Ensure lspconfig[lsp_name] is initialized
   if not lspconfig[lsp_name] then
     lspconfig[lsp_name] = {}
   end
@@ -99,7 +99,7 @@ local function setup_godot_lsp(user_config)
   end
 end
 
--- Autocommand to start LSP for GDScript buffers with delay to avoid timing issues
+-- Autocommand to start LSP for GDScript buffers with delay
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "gdscript",
   callback = function()
@@ -108,7 +108,7 @@ vim.api.nvim_create_autocmd("FileType", {
       if not success then
         print("Error starting Godot LSP for GDScript buffer: " .. vim.inspect(err))
       end
-    end, 100) -- 100ms delay to ensure lspconfig is loaded
+    end, 500) -- Increased delay to 500ms to ensure initialization
   end,
 })
 
@@ -129,12 +129,11 @@ vim.api.nvim_create_user_command("GodotLspStatus", function()
   end
 end, {})
 
--- Expose setup function for user configuration
+-- Expose setup function for user configuration (do not auto-start LSP)
 return {
   setup = function(user_config)
-    local success, err = pcall(setup_godot_lsp, user_config)
-    if not success then
-      print("Error configuring Godot LSP: " .. vim.inspect(err))
-    end
+    -- Merge user config but do not start LSP immediately
+    default_config = vim.tbl_deep_extend("force", default_config, user_config or {})
+    print "Godot LSP plugin configured. LSP will start when a GDScript file is opened."
   end,
 }
