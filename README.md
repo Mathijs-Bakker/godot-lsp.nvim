@@ -70,14 +70,14 @@ require("godot-lsp").setup({
 
 ## Notes
 
-Only one Neovim instance can connect to Godot's LSP server at a time due to the single TCP port limitation. For multiple instances, consider running multiple Godot instances with different ports or using a proxy (not included).
-Ensure Godot is running with the LSP server enabled before opening Neovim.
+- Only one Neovim instance can connect to Godot's LSP server at a time due to the single TCP port limitation. For multiple instances, consider running multiple Godot instances with different ports or using a proxy (not included).
+- Ensure Godot is running with the LSP server enabled before opening Neovim.
 
 ## Troubleshooting
 
-Use `:LspInfo` to check the LSP client status.
-If the LSP doesn't connect, verify the port (6005 for Godot 4, 6008 for Godot 3) and ensure `ncat` is installed.
-Run `:GodotLspStatus` to confirm if Godot's LSP server is active.
+- Use `:LspInfo` to check the LSP client status.
+- If the LSP doesn't connect, verify the port (6005 for Godot 4, 6008 for Godot 3) and ensure `ncat` is installed.
+- Run `:GodotLspStatus` to confirm if Godot's LSP server is active.
 
-License
+## License
 MIT
