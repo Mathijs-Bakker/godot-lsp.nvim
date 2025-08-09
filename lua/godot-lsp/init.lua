@@ -17,16 +17,17 @@ local default_config = {
     return util.path.dirname(fname)
   end,
   settings = {},
-  skip_godot_check = true, -- Skip pgrep check since manual ncat works
-  capabilities = {
-    textDocument = {
-      completion = { completionItem = { snippetSupport = true } },
-      definition = { linkSupport = true },
-      hover = { contentFormat = { "markdown", "plaintext" } },
-      publishDiagnostics = { relatedInformation = true },
-    },
+  skip_godot_check = true, -- Skip checking for Godot process
+  debug_logging = false, -- Log debug info to ~/.cache/nvim/godot-lsp.log
+  keymaps = { -- Default keymaps for LSP actions
+    definition = "gd", -- Go to definition
+    hover = "K", -- Show hover documentation
+    code_action = "<leader>ca", -- Code actions
+    completion = "<C-x><C-o>", -- Trigger completion
+    diagnostic_open_float = "<leader>cd", -- Show diagnostics in floating window
+    diagnostic_goto_next = "]d", -- Go to next diagnostic
+    diagnostic_goto_prev = "[d", -- Go to previous diagnostic
   },
-  debug_logging = false, -- Enable to log debug messages to ~/.cache/nvim/godot-lsp.log
 }
 
 -- Store client ID to reuse across buffers
@@ -166,12 +167,67 @@ local function setup_godot_lsp(user_config)
             .. port,
           config
         )
-        -- Add default LSP mappings
+        -- Set omnifunc for completion
         vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+        -- Define keymaps
         local opts = { buffer = bufnr, noremap = true, silent = true }
-        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+        local keymaps = config.keymaps
+        if keymaps.definition then
+          vim.keymap.set(
+            "n",
+            keymaps.definition,
+            vim.lsp.buf.definition,
+            vim.tbl_extend("force", opts, { desc = "Go to definition" })
+          )
+        end
+        if keymaps.hover then
+          vim.keymap.set(
+            "n",
+            keymaps.hover,
+            vim.lsp.buf.hover,
+            vim.tbl_extend("force", opts, { desc = "Show hover documentation" })
+          )
+        end
+        if keymaps.code_action then
+          vim.keymap.set(
+            "n",
+            keymaps.code_action,
+            vim.lsp.buf.code_action,
+            vim.tbl_extend("force", opts, { desc = "Code actions" })
+          )
+        end
+        if keymaps.completion then
+          vim.keymap.set(
+            "i",
+            keymaps.completion,
+            vim.lsp.buf.completion,
+            vim.tbl_extend("force", opts, { desc = "Trigger completion" })
+          )
+        end
+        if keymaps.diagnostic_open_float then
+          vim.keymap.set(
+            "n",
+            keymaps.diagnostic_open_float,
+            vim.diagnostic.open_float,
+            vim.tbl_extend("force", opts, { desc = "Show diagnostics in floating window" })
+          )
+        end
+        if keymaps.diagnostic_goto_next then
+          vim.keymap.set(
+            "n",
+            keymaps.diagnostic_goto_next,
+            vim.diagnostic.goto_next,
+            vim.tbl_extend("force", opts, { desc = "Go to next diagnostic" })
+          )
+        end
+        if keymaps.diagnostic_goto_prev then
+          vim.keymap.set(
+            "n",
+            keymaps.diagnostic_goto_prev,
+            vim.diagnostic.goto_prev,
+            vim.tbl_extend("force", opts, { desc = "Go to previous diagnostic" })
+          )
+        end
         -- Enable diagnostics
         vim.diagnostic.config {
           virtual_text = true,
@@ -223,7 +279,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile", "BufEnter" }, {
   callback = function(args)
     local bufnr = args.buf
     vim.bo[bufnr].filetype = "gdscript"
-    local config = default_config -- Use current config
+    local config = default_config
     log_message(
       "Set filetype to gdscript for buffer " .. bufnr .. " (" .. vim.api.nvim_buf_get_name(bufnr) .. ")",
       config
