@@ -46,15 +46,35 @@ end
 -- Attach buffer to LSP client
 local function attach_buffer_to_client(bufnr, client_id)
   if vim.bo[bufnr].filetype == "gdscript" and vim.api.nvim_buf_is_loaded(bufnr) then
-    vim.lsp.buf_attach_client(bufnr, client_id)
-    print(
-      "Attached buffer "
-        .. bufnr
-        .. " ("
-        .. vim.api.nvim_buf_get_name(bufnr)
-        .. ") to Godot LSP client ID "
-        .. client_id
-    )
+    local success, err = pcall(vim.lsp.buf_attach_client, bufnr, client_id)
+    if success then
+      print(
+        "Attached buffer "
+          .. bufnr
+          .. " ("
+          .. vim.api.nvim_buf_get_name(bufnr)
+          .. ") to Godot LSP client ID "
+          .. client_id
+      )
+    else
+      print(
+        "Failed to attach buffer "
+          .. bufnr
+          .. " ("
+          .. vim.api.nvim_buf_get_name(bufnr)
+          .. ") to Godot LSP client ID "
+          .. client_id
+          .. ": "
+          .. vim.inspect(err)
+      )
+    end
+  end
+end
+
+-- Attach all GDScript buffers to the LSP client
+local function attach_all_gdscript_buffers(client_id)
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+    attach_buffer_to_client(bufnr, client_id)
   end
 end
 
@@ -81,7 +101,7 @@ local function setup_godot_lsp(user_config)
     local client = vim.lsp.get_client_by_id(godot_lsp_client_id)
     if client then
       print("Reusing existing Godot LSP client with ID " .. godot_lsp_client_id)
-      attach_buffer_to_client(vim.api.nvim_get_current_buf(), godot_lsp_client_id)
+      attach_all_gdscript_buffers(godot_lsp_client_id)
       return
     end
   end
@@ -151,8 +171,8 @@ local function setup_godot_lsp(user_config)
     on_init = function(client)
       print("Godot LSP client initialized with ID " .. client.id)
       godot_lsp_client_id = client.id
-      -- Attach current buffer
-      attach_buffer_to_client(vim.api.nvim_get_current_buf(), client.id)
+      -- Attach all GDScript buffers
+      attach_all_gdscript_buffers(client.id)
     end,
   }
 
@@ -168,6 +188,8 @@ vim.api.nvim_create_autocmd("FileType", {
   pattern = "gdscript",
   callback = function()
     vim.defer_fn(function()
+      local bufnr = vim.api.nvim_get_current_buf()
+      print("FileType gdscript triggered for buffer " .. bufnr .. " (" .. vim.api.nvim_buf_get_name(bufnr) .. ")")
       local success, err = pcall(setup_godot_lsp)
       if not success then
         print("Error starting Godot LSP for GDScript buffer: " .. vim.inspect(err))
@@ -204,9 +226,7 @@ vim.api.nvim_create_user_command("GodotLspAttachAll", function()
     godot_lsp_client_id = nil
     return
   end
-  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-    attach_buffer_to_client(bufnr, godot_lsp_client_id)
-  end
+  attach_all_gdscript_buffers(godot_lsp_client_id)
 end, {})
 
 -- Expose setup function for user configuration
