@@ -122,6 +122,16 @@ local function setup_godot_lsp(user_config)
     end
   end
 
+  -- Check for existing godot_lsp clients to avoid duplicates
+  for _, client in ipairs(vim.lsp.get_active_clients()) do
+    if client.name == lsp_name then
+      print("Found existing godot_lsp client with ID " .. client.id)
+      godot_lsp_client_id = client.id
+      attach_buffer_to_client(vim.api.nvim_get_current_buf(), godot_lsp_client_id)
+      return
+    end
+  end
+
   -- Ensure lspconfig[lsp_name] is initialized
   if not lspconfig[lsp_name] then
     lspconfig[lsp_name] = {}
