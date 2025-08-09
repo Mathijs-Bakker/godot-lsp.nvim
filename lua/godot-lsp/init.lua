@@ -203,8 +203,16 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     -- Force TreeSitter highlighting
     local ok, ts = pcall(require, "nvim-treesitter.configs")
     if ok then
-      print("TreeSitter status for buffer " .. bufnr .. ": " .. vim.inspect(ts.get_module "highlight"))
-      vim.treesitter.start(bufnr, "gdscript")
+      local ts_status = ts.get_module "highlight"
+      print("TreeSitter status for buffer " .. bufnr .. ": " .. vim.inspect(ts_status))
+      if ts_status and not ts_status.enable then
+        print("Enabling TreeSitter highlighting for buffer " .. bufnr)
+        ts.setup { highlight = { enable = true } }
+      end
+      local parser_ok, _ = pcall(vim.treesitter.start, bufnr, "gdscript")
+      if not parser_ok then
+        print("Failed to start TreeSitter parser for gdscript in buffer " .. bufnr)
+      end
     else
       print("nvim-treesitter not loaded for buffer " .. bufnr)
     end
