@@ -1,4 +1,8 @@
-local lspconfig = require "lspconfig"
+local ok, lspconfig = pcall(require, "lspconfig")
+if not ok then
+  print "Error: nvim-lspconfig is not installed or failed to load. Please install it to use godot-lsp.nvim."
+  return
+end
 local util = require "lspconfig.util"
 
 -- Default configuration for Godot LSP
@@ -9,16 +13,8 @@ local default_config = {
     return util.root_pattern("project.godot", ".git")(fname) or util.path.dirname(fname)
   end,
   settings = {},
-  skip_godot_check = true, -- Skip pgrep check by default since manual ncat works
+  skip_godot_check = true, -- Skip pgrep check since manual ncat works
 }
-
--- Function to check if Godot is running (optional, for debugging)
-local function is_godot_running()
-  local handle = io.popen "pgrep -f 'godot.*--lsp' 2>/dev/null"
-  local result = handle:read "*a"
-  handle:close()
-  return result ~= ""
-end
 
 -- Test ncat connection
 local function test_ncat_connection(host, port)
@@ -34,20 +30,12 @@ local function setup_godot_lsp(user_config)
   local config = vim.tbl_deep_extend("force", default_config, user_config or {})
   local lsp_name = "godot_lsp"
 
-  -- Skip Godot check if configured or test ncat connection
-  if not config.skip_godot_check then
-    if not is_godot_running() then
-      print "Godot LSP server not detected via pgrep. Ensure Godot is running with --lsp."
-      return
-    end
-  end
-
   -- Test ncat connection
   local host, port = config.cmd[2], config.cmd[3]
   if not test_ncat_connection(host, port) then
     print(
       string.format(
-        "Failed to connect to Godot LSP server at %s:%s using ncat. Ensure ncat is installed and the port is correct.",
+        "Failed to connect to Godot LSP server at %s:%s using ncat. Ensure ncat is installed and Godot is running.",
         host,
         port
       )
@@ -55,38 +43,56 @@ local function setup_godot_lsp(user_config)
     return
   end
 
+  -- Configure LSP client
   lspconfig[lsp_name] = {
+    default_config = {
+      cmd = config.cmd,
+      filetypes = config.filetypes,
+      root_dir = config.root_dir,
+      settings = config.settings,
+    },
+  }
+
+  -- Setup LSP client
+  local success, err = pcall(function()
+    lspconfig[lsp_name].setup {
+      cmd = config.cmd,
+      filetypes = config.filetypes,
+      root_dir = config.root_dir,
+      settings = config.settings,
+      on_attach = function(client, bufnr)
+        print("Godot LSP connected for buffer " .. bufnr .. " on port " .. config.cmd[3])
+        -- Add default LSP mappings
+        vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
+        local opts = { buffer = bufnr, noremap = true, silent = true }
+        vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+        vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+      end,
+      on_error = function(err)
+        print("Godot LSP error: " .. vim.inspect(err))
+      end,
+      on_exit = function(code, signal)
+        print("Godot LSP client exited with code " .. code .. " and signal " .. signal)
+      end,
+    }
+  end)
+
+  if not success then
+    print("Failed to setup Godot LSP: " .. vim.inspect(err))
+    return
+  end
+
+  -- Start LSP client
+  local client_id = vim.lsp.start_client {
     name = lsp_name,
     cmd = config.cmd,
-    filetypes = config.filetypes,
-    root_dir = config.root_dir,
-    settings = config.settings,
-  }
-
-  lspconfig[lsp_name].setup {
-    cmd = config.cmd,
-    filetypes = config.filetypes,
-    root_dir = config.root_dir,
-    settings = config.settings,
-    on_attach = function(client, bufnr)
-      print("Godot LSP connected for buffer " .. bufnr .. " on port " .. config.cmd[3])
-      -- Add default LSP mappings
-      vim.api.nvim_buf_set_option(bufnr, "omnifunc", "v:lua.vim.lsp.omnifunc")
-      local opts = { buffer = bufnr, noremap = true, silent = true }
-      vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-      vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-      vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
-    end,
+    root_dir = config.root_dir(),
     on_error = function(err)
-      print("Godot LSP error: " .. vim.inspect(err))
-    end,
-    on_exit = function(code, signal)
-      print("Godot LSP client exited with code " .. code .. " and signal " .. signal)
+      print("Godot LSP client error: " .. vim.inspect(err))
     end,
   }
 
-  -- Force LSP start for the current buffer
-  local client_id = vim.lsp.start_client(lspconfig[lsp_name].config)
   if not client_id then
     print(
       "Failed to start Godot LSP client. Ensure 'ncat' is installed and Godot is running on port "
@@ -102,13 +108,19 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "gdscript",
   callback = function()
-    setup_godot_lsp()
+    local success, err = pcall(setup_godot_lsp)
+    if not success then
+      print("Error starting Godot LSP for GDScript buffer: " .. vim.inspect(err))
+    end
   end,
 })
 
 -- User commands
 vim.api.nvim_create_user_command("GodotLspStart", function()
-  setup_godot_lsp()
+  local success, err = pcall(setup_godot_lsp)
+  if not success then
+    print("Error starting Godot LSP: " .. vim.inspect(err))
+  end
 end, {})
 
 vim.api.nvim_create_user_command("GodotLspStatus", function()
@@ -123,6 +135,9 @@ end, {})
 -- Expose setup function for user configuration
 return {
   setup = function(user_config)
-    setup_godot_lsp(user_config)
+    local success, err = pcall(setup_godot_lsp, user_config)
+    if not success then
+      print("Error configuring Godot LSP: " .. vim.inspect(err))
+    end
   end,
 }
