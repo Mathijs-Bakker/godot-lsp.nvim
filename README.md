@@ -1,4 +1,4 @@
-![godot-lsp.nvim logo]("http://github.com/Mathijs-Bakker/godot-lsp.nvim/assetts/logo_godot-lsp-nvvim.svg")
+![godot-lsp.nvim logo]("https://github.com/Mathijs-Bakker/godot-lsp.nvim/blob/development/assets/logo_godot-lsp-nvim.svg")
 
 # godot-lsp.nvim
 
