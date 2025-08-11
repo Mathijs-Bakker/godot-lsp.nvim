@@ -1,3 +1,5 @@
+![godot-lsp.nvim logo]("http://github.com/Mathijs-Bakker/godot-lsp.nvim/assetts/logo_godot-lsp-nvvim.svg")
+
 # godot-lsp.nvim
 
 A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript, providing features like go-to-definition, hover documentation, code actions, diagnostics, and completion across multiple buffers. Supports TreeSitter syntax highlighting and experimental DAP debugging.
