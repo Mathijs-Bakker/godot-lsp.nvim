@@ -50,7 +50,7 @@ Add to your `init.lua`:
 ```lua
 require("lazy").setup({
   {
-    "username/godot-lsp.nvim",
+    "Mathijs-Bakker/godot-lsp.nvim",
     config = function()
       require("godot-lsp").setup({
         skip_godot_check = true, -- Skip Godot process check
@@ -201,22 +201,22 @@ Customize the plugin by passing options to `setup`:
 require("godot-lsp").setup({
   cmd = { "ncat", "localhost", "6005" }, -- LSP command (default)
   filetypes = { "gdscript" },            -- Filetypes to trigger LSP (default)
-  skip_godot_check = true,              -- Skip checking for Godot process
+  skip_godot_check = true,               -- Skip checking for Godot process
   debug_logging = false,                 -- Log debug info to ~/.cache/nvim/godot-lsp.log
-  keymaps = {                           -- Customize LSP keymaps
-    definition = "gd",                  -- Go to definition
-    declaration = "gD",                 -- Go to declaration
-    type_definition = "gt",             -- Go to type definition
-    hover = "K",                        -- Show hover documentation
-    code_action = "<leader>ca",         -- Code actions
-    completion = "<C-x><C-o>",          -- Trigger completion (in insert mode)
+  keymaps = {                            -- Customize LSP keymaps
+    definition = "gd",                   -- Go to definition
+    declaration = "gD",                  -- Go to declaration
+    type_definition = "gt",              -- Go to type definition
+    hover = "K",                         -- Show hover documentation
+    code_action = "<leader>ca",          -- Code actions
+    completion = "<C-x><C-o>",           -- Trigger completion (in insert mode)
     diagnostic_open_float = "<leader>cd", -- Show diagnostics in floating window
-    diagnostic_goto_next = "]d",        -- Go to next diagnostic
-    diagnostic_goto_prev = "[d",        -- Go to previous diagnostic
+    diagnostic_goto_next = "]d",         -- Go to next diagnostic
+    diagnostic_goto_prev = "[d",         -- Go to previous diagnostic
     references = "<leader>cr",           -- Show references (requires Telescope)
-    rename = "<leader>rn",              -- Rename symbol
+    rename = "<leader>rn",               -- Rename symbol
     workspace_symbols = "<leader>ws",    -- Search workspace symbols (requires Telescope)
-    format = "<leader>f",               -- Format buffer
+    format = "<leader>f",                -- Format buffer
     -- Set to nil or false to disable a keymap
   },
 })
