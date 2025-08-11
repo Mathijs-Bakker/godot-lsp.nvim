@@ -21,7 +21,15 @@ local defaults = {
     rename = "<leader>rn",
     workspace_symbols = "<leader>ws",
     format = "<leader>f",
+    -- DAP keymaps (optional)
+    dap_continue = "<F5>",
+    dap_toggle_breakpoint = "<F9>",
+    dap_step_over = "<F10>",
+    dap_step_into = "<F11>",
+    dap_step_out = "<F12>",
+    dap_ui = "<leader>du",
   },
+  dap = false, -- Enable DAP support (experimental)
 }
 
 -- Setup function
@@ -49,7 +57,7 @@ function M.setup(opts)
       end
     end
 
-    -- Keymaps
+    -- LSP Keymaps
     map("n", opts.keymaps.definition, vim.lsp.buf.definition, "Go to definition")
     map("n", opts.keymaps.declaration, vim.lsp.buf.declaration, "Go to declaration")
     map("n", opts.keymaps.type_definition, vim.lsp.buf.type_definition, "Go to type definition")
@@ -63,6 +71,16 @@ function M.setup(opts)
     map("n", opts.keymaps.rename, vim.lsp.buf.rename, "Rename symbol")
     map("n", opts.keymaps.workspace_symbols, ":Telescope lsp_workspace_symbols<CR>", "Workspace symbols")
     map("n", opts.keymaps.format, vim.lsp.buf.format, "Format buffer")
+
+    -- DAP Keymaps (if enabled)
+    if opts.dap then
+      map("n", opts.keymaps.dap_continue, require("dap").continue, "Continue debugging")
+      map("n", opts.keymaps.dap_toggle_breakpoint, require("dap").toggle_breakpoint, "Toggle breakpoint")
+      map("n", opts.keymaps.dap_step_over, require("dap").step_over, "Step over")
+      map("n", opts.keymaps.dap_step_into, require("dap").step_into, "Step into")
+      map("n", opts.keymaps.dap_step_out, require("dap").step_out, "Step out")
+      map("n", opts.keymaps.dap_ui, require("dapui").toggle, "Toggle DAP UI")
+    end
 
     -- Optional: Highlight current symbol
     if client.server_capabilities.documentHighlightProvider then
@@ -117,7 +135,6 @@ function M.setup(opts)
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.gd",
     callback = function()
-      -- Optional: Notify Godot to reload the script (if supported by LSP)
       vim.lsp.buf_notify(0, "godot/reloadScript", { uri = vim.uri_from_bufnr(0) })
     end,
     desc = "Notify Godot to reload script on save",
@@ -130,6 +147,55 @@ function M.setup(opts)
     end,
     desc = "Detach GDScript buffer from LSP on close",
   })
+
+  -- DAP Setup (if enabled)
+  if opts.dap then
+    local dap_status_ok, dap = pcall(require, "dap")
+    if not dap_status_ok then
+      vim.notify("nvim-dap not found. Install it to use DAP features.", vim.log.levels.WARN)
+      return
+    end
+
+    local dapui_status_ok, dapui = pcall(require, "dapui")
+    if not dapui_status_ok then
+      vim.notify("nvim-dap-ui not found. Install it for a better DAP UI.", vim.log.levels.WARN)
+    else
+      dapui.setup()
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
+      end
+    end
+
+    -- Godot DAP Adapter (Experimental)
+    dap.adapters.godot = {
+      type = "server",
+      host = "localhost",
+      port = 6006, -- Default Godot debug port (adjust if needed)
+      executable = {
+        command = "godot",
+        args = { "--remote-debug", "localhost:6006", "--editor" },
+      },
+    }
+
+    -- Godot Debug Configuration
+    dap.configurations.gdscript = {
+      {
+        type = "godot",
+        request = "launch",
+        name = "Launch Godot Debug",
+        program = vim.fn.getcwd() .. "/project.godot", -- Adjust path to your Godot project
+        stopOnEntry = true,
+      },
+    }
+
+    vim.notify("Godot DAP initialized (experimental). Run :DapContinue to start debugging.", vim.log.levels.INFO)
+  end
 
   -- Commands
   vim.api.nvim_create_user_command("GodotLspStart", function()
