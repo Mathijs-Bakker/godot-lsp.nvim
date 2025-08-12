@@ -106,16 +106,30 @@ function M.setup(opts)
     end
   end
 
-  -- Configure LSP server
-  if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
-    lspconfig.godot_lsp.setup {
-      cmd = opts.cmd,
-      filetypes = opts.filetypes,
-      on_attach = on_attach,
-      flags = { debounce_text_changes = 150 },
-    }
-  else
-    vim.notify("Failed to setup godot_lsp client. Check lspconfig installation.", vim.log.levels.ERROR)
+  -- Configure LSP server with fallback
+  local setup_ok, _ = pcall(function()
+    if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
+      lspconfig.godot_lsp.setup {
+        cmd = opts.cmd,
+        filetypes = opts.filetypes,
+        on_attach = on_attach,
+        flags = { debounce_text_changes = 150 },
+      }
+    else
+      vim.notify(
+        "godot_lsp setup failed: client not properly registered. Attempting manual start...",
+        vim.log.levels.WARN
+      )
+      vim.lsp.start {
+        name = "godot_lsp",
+        cmd = opts.cmd,
+        on_attach = on_attach,
+        root_dir = vim.fn.getcwd(),
+      }
+    end
+  end)
+  if not setup_ok then
+    vim.notify("Failed to setup godot_lsp client. Check lspconfig and logs.", vim.log.levels.ERROR)
     return
   end
 
@@ -215,10 +229,19 @@ function M.setup(opts)
 
   -- Commands
   vim.api.nvim_create_user_command("GodotLspStart", function()
-    if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
-      lspconfig.godot_lsp.setup { on_attach = on_attach }
-      vim.lsp.start_client(lspconfig.godot_lsp)
-    end
+    local status_ok, _ = pcall(function()
+      if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
+        lspconfig.godot_lsp.setup { on_attach = on_attach }
+        vim.lsp.start_client(lspconfig.godot_lsp)
+      else
+        vim.lsp.start {
+          name = "godot_lsp",
+          cmd = opts.cmd,
+          on_attach = on_attach,
+          root_dir = vim.fn.getcwd(),
+        }
+      end
+    end)
     if opts.debug_logging then
       vim.notify("Godot LSP started", vim.log.levels.INFO)
     end
