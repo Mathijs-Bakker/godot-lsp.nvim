@@ -2,7 +2,7 @@ local M = {}
 
 -- Default configuration
 local defaults = {
-  cmd = { "ncat", "localhost", "6005" }, -- Try direct socket later if needed
+  cmd = { "ncat", "localhost", "6005" },
   filetypes = { "gdscript" },
   skip_godot_check = true,
   debug_logging = false,
