@@ -8,6 +8,7 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 
 - [Features](#-features)
 - [Requirements](#-requirements)
+- [Why I Created This Plugin](#-why-i-created-this-plugin)
 - [Installation](#-installation)
   - [With lazy.nvim](#-with-lazynvim)
   - [Install TreeSitter Parser](#install-treesitter-parser)
@@ -42,6 +43,9 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 - Optional: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for enhanced references and workspace symbols
 - Optional (for DAP): [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
 
+## 🌱 Why I Created This Plugin
+
+I wanted to use Neovim as my external editor for Godot, enhancing my workflow with its powerful features. However, I had some bad setups that didn’t work, and other plugins didn’t do the trick for my specific needs. Frustrated with the lack of a reliable solution, I decided to make one myself. Debugging is still in progress and not probably stable yet, so expect some rough edges. I am on macOS and haven’t tested this on Linux, though it might work with some adjustments. I am using Ghostty as my daily driver, but other terminal emulators like Kitty should work too — feel free to try it. There’s no Windows support as I don’t have a Windows machine, and I’m not planning to support it, but contributions are welcome if someone wants to add it.
 
 ## 📦 Installation
 
