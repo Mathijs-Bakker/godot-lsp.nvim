@@ -6,9 +6,9 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 
 ## 📑 Table of Contents
 
-- [Features](#-features)
-- [Requirements](#-requirements)
-- [Why I Created This Plugin](#-why-i-created-this-plugin)
+- [Features](#✨-features)
+- [Requirements](#🛠️-requirements)
+- [Why I Created This Plugin](#🌱-why-i-created-this-plugin)
 - [Installation](#-installation)
   - [With lazy.nvim](#-with-lazynvim)
   - [Install TreeSitter Parser](#install-treesitter-parser)
@@ -19,6 +19,7 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
   - [Debug Logging](#debug-logging)
   - [DAP Debugging (Experimental)](#dap-debugging-experimental)
 - [Troubleshooting](#-troubleshooting)
+- [Example Setup](#-example-setup)
 - [Contributing](#-contributing)
 - [License](#-license)
 
@@ -313,6 +314,59 @@ To enable debugging:
 - **Debug logs:**
     - Enable `debug_logging = true` and check `~/.cache/nvim/godot-lsp.log`.
     - Run `:lua print(vim.inspect(vim.lsp.get_clients({ name = "godot_lsp" })))` to verify one `godot_lsp` client.
+
+## Example Setup:
+Here is an complete example of a Lazy.nvim setup. Place it in `~/.config/nvim/lua/<your-lazy-plugin-folder>/godot-lsp.lua`. So it gets autoloaded.
+
+```lua
+return {
+  'Mathijs-Bakker/godot-lsp.nvim',
+  branch = 'master',
+  dependencies = { 'neovim/nvim-lspconfig' },
+  config = function()
+    local lspconfig_status_ok, lspconfig = pcall(require, 'lspconfig')
+    if not lspconfig_status_ok then
+      vim.notify('nvim-lspconfig not found. Please ensure it is installed and loaded.', vim.log.levels.ERROR)
+      return
+    end
+
+    local status_ok, godot_lsp = pcall(require, 'godot-lsp')
+    if not status_ok then
+      vim.notify('godot-lsp.nvim not found, install it with :Lazy sync', vim.log.levels.ERROR)
+      return
+    end
+
+    godot_lsp.setup {
+      cmd = { 'ncat', 'localhost', '6005' },
+      filetypes = { 'gdscript' },
+      skip_godot_check = true,
+      debug_logging = true,
+      dap = true,
+      keymaps = {
+        definition = 'gd',
+        declaration = 'gD',
+        type_definition = 'gt',
+        hover = 'K',
+        code_action = '<leader>ca',
+        completion = '<C-x><C-o>',
+        diagnostic_open_float = '<leader>cd',
+        diagnostic_goto_next = ']d',
+        diagnostic_goto_prev = '[d',
+        references = '<leader>cr',
+        rename = '<leader>rn',
+        workspace_symbols = '<leader>ws',
+        format = '<leader>f',
+        dap_continue = '<F5>',
+        dap_toggle_breakpoint = '<F9>',
+        dap_step_over = '<F10>',
+        dap_step_into = '<F11>',
+        dap_step_out = '<F12>',
+        dap_ui = '<leader>du',
+      },
+    }
+  end,
+}
+```
 
 ## 🤝 Contributing
 Contributions are welcome! Submit issues or pull requests to github.com/username/godot-lsp.nvim.
