@@ -6,7 +6,7 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 
 ## 📑 Table of Contents
 
-- [Features](#features)
+- [Features](#-features)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [With lazy.nvim](#with-lazynvim)
