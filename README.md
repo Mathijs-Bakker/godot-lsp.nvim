@@ -148,6 +148,7 @@ To open GDScript files from Godot directly in Neovim (running in a terminal) at 
     - Set **Exec Path**: `/Users/<your-username>/.local/bin/open-nvim-godot.sh`
     - Set **Exec Flags**: `"{file}" "{line}" "{col}"`
     - *Note:* Use the full path (e.g., `/Users/LukeSkywalker/.local/bin/open-nvim-godot.sh`) instead of `~/.local/bin/open-nvim-godot.sh` to avoid expansion issues.
+<div align="center"><img src="assets/godot_editor_settings.png"></div>
 
 3. **Open Scripts:**
 
@@ -294,7 +295,7 @@ To enable debugging:
     - Test the launch script manually:
         ```bash
         /Users/<your-username>/.local/bin/open-nvim-godot.sh "/path/to/test script.gd" 10 5
-    ```
+        ```
     - Ensure `/Users/<your-username>/.local/bin` is in `PATH` (echo $PATH).
     - Verify script permissions: `ls -l /Users/<your-username>/.local/bin/open-nvim-godot.sh` (should show `-rwxr-xr-x`).
     - Test Ghostty directly:
