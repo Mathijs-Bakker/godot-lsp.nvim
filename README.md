@@ -7,19 +7,19 @@ A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript
 ## 📑 Table of Contents
 
 - [Features](#-features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-  - [With lazy.nvim](#with-lazynvim)
+- [Requirements](#-requirements)
+- [Installation](#-installation)
+  - [With lazy.nvim](#-with-lazynvim)
   - [Install TreeSitter Parser](#install-treesitter-parser)
-- [External Editor Setup](#external-editor-setup)
-- [Usage](#usage)
+- [External Editor Setup](#-external-editor-setup)
+- [Usage](#-usage)
   - [Commands](#commands)
   - [Configuration](#configuration)
   - [Debug Logging](#debug-logging)
   - [DAP Debugging (Experimental)](#dap-debugging-experimental)
-- [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
-- [License](#license)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## ✨ Features
 
@@ -111,7 +111,7 @@ Ensure the `gdscript` parser is installed:
 :TSInstall gdscript
 ```
 
-⚙️ External Editor Setup
+## ⚙️ External Editor Setup
 To open GDScript files from Godot directly in Neovim (running in a terminal) at the exact line and column, use a launch script for consistent behavior and to handle file paths with spaces. Use the full path to the script to avoid issues with ~ expansion.
 
 1. **Create a Launch Script:**
