@@ -1,4 +1,3 @@
--- lua/godot-lsp/init.lua
 local M = {}
 
 -- Default configuration
@@ -43,17 +42,25 @@ function M.setup(opts)
     return
   end
 
-  -- Register godot_lsp in lspconfig.configs
+  -- Register godot_lsp in lspconfig.configs with explicit setup
   if not lspconfig.configs.godot_lsp then
     lspconfig.configs.godot_lsp = {
       default_config = {
         cmd = opts.cmd,
         filetypes = opts.filetypes,
-        root_dir = vim.fn.getcwd(),
+        root_dir = function(fname)
+          return vim.fn.getcwd() -- Simple root dir for now; adjust if needed
+        end,
       },
       docs = {
         description = "Godot LSP for GDScript",
+        default_config = {
+          root_dir = [[vim.fs.dirname(vim.fs.find({'project.godot'}, { upward = true })[1])]],
+        },
       },
+      on_new_config = function(new_config, new_root_dir)
+        new_config.cmd = opts.cmd
+      end,
     }
     vim.notify("Registered godot_lsp client with lspconfig", vim.log.levels.INFO)
   end
@@ -104,15 +111,26 @@ function M.setup(opts)
     end
   end
 
-  -- Configure LSP server with debug
+  -- Configure LSP server with explicit start
   local success, err = pcall(function()
     lspconfig.godot_lsp.setup {
       cmd = opts.cmd,
       filetypes = opts.filetypes,
       on_attach = on_attach,
       flags = { debounce_text_changes = 150 },
+      -- Force start the client
+      handlers = {
+        ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
+          if err then
+            vim.notify("LSP workspace config error: " .. vim.inspect(err), vim.log.levels.ERROR)
+            return
+          end
+          vim.lsp.buf_execute_command { command = "workspace/didChangeConfiguration", arguments = { settings = {} } }
+        end,
+      },
     }
-    vim.notify("godot_lsp setup completed", vim.log.levels.INFO)
+    vim.lsp.start { name = "godot_lsp", cmd = opts.cmd, on_attach = on_attach, root_dir = vim.fn.getcwd() }
+    vim.notify("godot_lsp setup and client started", vim.log.levels.INFO)
   end)
   if not success then
     vim.notify("Failed to setup godot_lsp: " .. vim.inspect(err), vim.log.levels.ERROR)
