@@ -134,7 +134,7 @@ function M.setup(opts)
           end,
         },
       }
-      local clients = vim.lsp.get_active_clients { name = "godot_lsp" }
+      local clients = vim.lsp.get_clients { name = "godot_lsp" }
       if #clients > 0 then
         godot_lsp_client_id = clients[1].id
         vim.notify("Started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
@@ -282,7 +282,7 @@ function M.setup(opts)
           on_attach = on_attach,
           flags = { debounce_text_changes = 150 },
         }
-        local clients = vim.lsp.get_active_clients { name = "godot_lsp" }
+        local clients = vim.lsp.get_clients { name = "godot_lsp" }
         if #clients > 0 then
           godot_lsp_client_id = clients[1].id
           vim.notify("Started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
@@ -309,7 +309,7 @@ function M.setup(opts)
   end, { desc = "Start Godot LSP client" })
 
   vim.api.nvim_create_user_command("GodotLspStatus", function()
-    local clients = vim.lsp.get_active_clients { name = "godot_lsp" }
+    local clients = vim.lsp.get_clients { name = "godot_lsp" }
     if #clients > 0 then
       vim.notify("Godot LSP is running (id: " .. clients[1].id .. ")", vim.log.levels.INFO)
     else
