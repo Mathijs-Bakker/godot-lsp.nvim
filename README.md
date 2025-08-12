@@ -369,7 +369,7 @@ return {
 ```
 
 ## Simular Projects
-- [Lommix/godot.nvim)](https://github.com/Lommix/godot.nvim) - Minimalist Godot debugging tool for Neovim.
+- [Lommix/godot.nvim](https://github.com/Lommix/godot.nvim) - Minimalist Godot debugging tool for Neovim.
 - [niscolas/nvim-godot](https://github.com/niscolas/nvim-godot) - Godot LSP feautures.
 - [QuickGD/quickgd.nvim](https://github.com/QuickGD/quickgd.nvim) - Auto-completion for gdshader.
 - [upperhands/godot-neovim](https://github.com/upperhands/godot-neovim) - Keymaps for Godot commands (run scene, show documentation).
