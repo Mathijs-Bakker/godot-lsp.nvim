@@ -1,4 +1,3 @@
--- lua/godot-lsp/init.lua
 local M = {}
 
 -- Default configuration
@@ -36,18 +35,30 @@ local defaults = {
 function M.setup(opts)
   opts = vim.tbl_deep_extend("force", defaults, opts or {})
 
-  -- Setup LSP client
-  local lspconfig = require "lspconfig"
-  lspconfig.godot_lsp = {
-    default_config = {
-      cmd = opts.cmd,
-      filetypes = opts.filetypes,
-      root_dir = vim.fn.getcwd(),
-    },
-    docs = {
-      description = "Godot LSP for GDScript",
-    },
-  }
+  -- Debug: Check if lspconfig is available
+  local status_ok, lspconfig = pcall(require, "lspconfig")
+  if not status_ok then
+    vim.notify(
+      "nvim-lspconfig not found. Please ensure it is installed and loaded before godot-lsp.nvim.",
+      vim.log.levels.ERROR
+    )
+    return
+  end
+
+  -- Register godot_lsp client
+  if not lspconfig.godot_lsp then
+    lspconfig.godot_lsp = {
+      default_config = {
+        cmd = opts.cmd,
+        filetypes = opts.filetypes,
+        root_dir = vim.fn.getcwd(),
+      },
+      docs = {
+        description = "Godot LSP for GDScript",
+      },
+    }
+    vim.notify("Registered godot_lsp client with lspconfig", vim.log.levels.INFO)
+  end
 
   -- LSP on_attach function
   local on_attach = function(client, bufnr)
@@ -96,12 +107,17 @@ function M.setup(opts)
   end
 
   -- Configure LSP server
-  lspconfig.godot_lsp.setup {
-    cmd = opts.cmd,
-    filetypes = opts.filetypes,
-    on_attach = on_attach,
-    flags = { debounce_text_changes = 150 },
-  }
+  if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
+    lspconfig.godot_lsp.setup {
+      cmd = opts.cmd,
+      filetypes = opts.filetypes,
+      on_attach = on_attach,
+      flags = { debounce_text_changes = 150 },
+    }
+  else
+    vim.notify("Failed to setup godot_lsp client. Check lspconfig installation.", vim.log.levels.ERROR)
+    return
+  end
 
   -- Autocommands
   vim.api.nvim_create_autocmd("FileType", {
@@ -199,8 +215,10 @@ function M.setup(opts)
 
   -- Commands
   vim.api.nvim_create_user_command("GodotLspStart", function()
-    lspconfig.godot_lsp.setup { on_attach = on_attach }
-    vim.lsp.start_client(lspconfig.godot_lsp)
+    if lspconfig.godot_lsp and lspconfig.godot_lsp.setup then
+      lspconfig.godot_lsp.setup { on_attach = on_attach }
+      vim.lsp.start_client(lspconfig.godot_lsp)
+    end
     if opts.debug_logging then
       vim.notify("Godot LSP started", vim.log.levels.INFO)
     end
