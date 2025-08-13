@@ -1,10 +1,12 @@
-# Troubleshooting
+<div align="center"><img src="../assets/logo_godot-lsp-nvim.svg" width="150"></div>
+
+# 🕵🏻‍♂️ Troubleshooting
 
 This document provides detailed steps to diagnose and resolve common issues with `godot-lsp.nvim`. If you encounter a problem, follow the relevant section below and check the debug logs at `~/.cache/nvim/godot-lsp.log` (enable with `debug_logging = true` in the plugin setup).
 
 ## General Issues
 
-### LSP Not Starting
+### 🚦 LSP Not Starting
 
 -   **Cause:** Godot may not be running with LSP enabled, or ncat is unavailable.
 -   **Steps:**
@@ -13,27 +15,27 @@ This document provides detailed steps to diagnose and resolve common issues with
     -   Run `:GodotLspStatus` to check server connectivity at `localhost:6005`.
     -   Check Neovim's LSP log with `:LspLog`.
 
-### No Syntax Highlighting
+### 🌟 No Syntax Highlighting
 
 -   **Cause:** nvim-treesitter or the gdscript parser may not be properly installed.
 -   **Steps:**
     -   Ensure `nvim-treesitter` is installed and the gdscript parser is active with `:TSInstall gdscript`.
     -   Run `:lua print(vim.inspect(require("nvim-treesitter.configs").get_module("highlight")))` to verify `enable = true`.
 
-### Slow or Missing Diagnostics
+### 🐢 Slow or Missing Diagnostics
 
 -   **Cause:** Godot LSP limitations may cause delays or persistent diagnostics for deleted files.
 -   **Steps:**
     -   Check `~/.cache/nvim/godot-lsp.log` with `debug_logging = true`.
     -   Accept minor delays as a known Godot LSP constraint.
 
-### Crashes During Completion
+### 💥 Crashes During Completion
 
 -   **Cause:** Triggering completion while running a game in the editor may overwhelm the LSP server.
 -   **Steps:**
     -   Avoid using completion (`<C-x><C-o>`) during game runtime in Godot.
 
-### External Editor Issues
+### 🌐 External Editor Issues
 
 -   **Cause:** The launch script or Godot configuration may be misconfigured.
 -   **Steps:**
@@ -51,7 +53,7 @@ This document provides detailed steps to diagnose and resolve common issues with
     -   Ensure **Exec Path** in Godot uses the full path (e.g., `/Users/<your-username>/.local/bin/open-nvim-godot.sh`), not `~/.local/bin/open-nvim-godot.sh`.
     -   Check Godot's output console for errors.
 
-### DAP Debugging Issues
+### 🪲 DAP Debugging Issues
 
 -   **Cause:** nvim-dap or Godot's remote debugging may not be configured correctly.
 -   **Steps:**
@@ -60,14 +62,14 @@ This document provides detailed steps to diagnose and resolve common issues with
     -   Check the program path in your DAP configuration (e.g., `/path/to/your/project.godot`).
     -   Enable `debug_logging` = true and inspect `~/.cache/nvim/godot-lsp.log`.
 
-### Debug Logs
+### 📝 Debug Logs
 
 -   **How to Use:**
     -   Enable `debug_logging = true` in the setup configuration.
     -   Check `~/.cache/nvim/godot-lsp.log` for details on buffer attachment, TreeSitter status, or LSP errors.
     -   Run `:lua print(vim.inspect(vim.lsp.get_clients({ name = "godot_lsp" })))` to verify the godot_lsp client.
 
-### Godot LSP Limitations
+### ✋ Godot LSP Limitations
 
 Godot's built-in LSP for GDScript is functional but less robust than servers like _clangd_ or _pyright_ due to its dynamic nature and partial implementation. Key supported features include _diagnostics, go-to-definition, hover,_ and _autocomplete_, while limitations include missing _type definition, code actions,_ and _formatting_. For a detailed breakdown, see [Godot LSP Capabilities](godot_lsp_capabilities.md). 
 
@@ -75,7 +77,7 @@ Workarounds:
 -   Use `gd` instead of `gt` for `definitions`.
 -   Install gdformat (`pip install gdtoolkit`) for formatting: `:!gdformat %`.
 
-### Additional Notes
+### ℹ️ Additional Notes
 
 -   **Linux Compatibility:** Untested but should work with `ncat` and terminal emulators like `gnome-terminal` or `xterm`. Feedback is welcome!
 -   **Windows Support:** Not planned due to lack of a Windows machine; contributions are encouraged.
