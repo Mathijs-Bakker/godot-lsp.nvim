@@ -2,382 +2,160 @@
 
 # godot-lsp.nvim
 
-A Neovim plugin to integrate Godot's Language Server Protocol (LSP) for GDScript, providing features like go-to-definition, hover documentation, code actions, diagnostics, and completion across multiple buffers. Supports TreeSitter syntax highlighting and experimental DAP debugging.
+A Neovim plugin to integrate Godot's LSP for GDScript, providing features like _go-to-definition, hover documentation, diagnostics,_ and _completion_ across multiple buffers. Supports TreeSitter syntax highlighting and experimental DAP debugging.
 
 ## 📑 Table of Contents
 
-- [✨ Features](#-features)
-- [❗ Requirements](#%EF%B8%8F-requirements)
-- [🌱 Why I Created This Plugin](#-why-i-created-this-plugin)
-- [📦 Installation](#-installation)
-  - [🐌 With lazy.nvim](#-with-lazynvim)
-  - [🌳 Install TreeSitter Parser](#-install-treesitter-parser)
-- [⚙️ External Editor Setup](#%EF%B8%8F-external-editor-setup)
-- [🚀 Usage](#-usage)
-  - [🤖 Commands](#-commands)
-  - [🛠️ Configuration](#%EF%B8%8F-configuration)
-  - [📋 Debug Logging](#-debug-logging)
-  - [🪲 DAP Debugging (Experimental)](#-dap-debugging-experimental)
-- [🕵🏻‍♂️ Troubleshooting](#-%EF%B8%8F-troubleshooting)
-- [✅ Example Setup](#-example-setup)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+- [✨ Features](#features)
+- [❗ Requirements](#requirements)
+- [🌱 Why I Created This Plugin](#why-i-created-this-plugin)
+- [🚀 Quick Start](#quick-start)
+- [⚙️ Setup](#setup)
+  - [📦 Installation](#installation)
+  - [🌳 TreeSitter Parser](#treesitter-parser)
+  - [🌐 External Editor](#external-editor)
+- [🎮 Usage](#usage)
+  - [🤖 Commands](#commands)
+  - [🛠️ Configuration](#configuration)
+  - [📋 Debug Logging](#debug-logging)
+  - [🪲 DAP Debugging](#dap-debugging)
+- [🕵🏻‍♂️ Troubleshooting](#troubleshooting)
+- [🤝 Contributing](#contributing)
+- [📄 License](#license)
 
 ## ✨ Features
 
-- **LSP Integration**: Connects to Godot's LSP server via `ncat` for GDScript autocompletion, definitions, declarations, type definitions, references, renaming, code actions, diagnostics, and formatting.
-- **Multi-Buffer Support**: Seamlessly attaches multiple GDScript buffers to the same LSP client, enabling consistent LSP features across all open files.
-- **TreeSitter Support**: Enables syntax highlighting for GDScript files using `nvim-treesitter`.
-- **Automatic Buffer Attachment**: Attaches all GDScript buffers to the LSP client automatically on file open or buffer creation.
-- **Customizable Keymaps**: Configurable key bindings for LSP actions like go-to-definition, hover, diagnostics navigation, renaming, and formatting.
-- **User Commands**: Commands to start the LSP, check server status, and attach buffers manually.
-- **Autocommands**: Automatically starts LSP, attaches buffers, ensures highlighting, and syncs script changes with Godot.
-- **DAP Debugging (Experimental)**: Optional support for debugging GDScript with breakpoints, step-through, and variable inspection using `nvim-dap`.
+- **LSP Integration**: Autocompletion, definitions, references, and diagnostics via Godot’s LSP.
+- **Multi-Buffer Support**: Syncs LSP across all GDScript buffers.
+- **TreeSitter**: Enhanced syntax highlighting.
+- **Custom Keymaps**: Configurable shortcuts for LSP actions.
+- **DAP Debugging**: Experimental debugging support (unstable).
 
-## 🛠️ Requirements
+<details>
+<summary>Full Feature Details</summary>
 
-- Neovim 0.9.0 or later
-- `ncat` (Netcat) installed (`brew install ncat` on macOS, `apt install ncat` on Debian/Ubuntu)
-- Godot 4.3 or later with LSP enabled (`godot --editor --lsp --verbose`)
+- Connects to Godot’s LSP server via `ncat` on port 6005.
+- Supports go-to-definition, hover documentation, renaming, and workspace symbols.
+- Automatic buffer attachment and TreeSitter highlighting on `.gd` file open.
+- Experimental DAP with breakpoints and step-through (requires `nvim-dap`).
+
+</details>
+
+## ❗ Requirements
+
+- Neovim 0.9.0+
+- `ncat` (e.g., `brew install ncat` on macOS, `apt install ncat` on Linux)
+- Godot 4.3+ with `--lsp`
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig)
-- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) for syntax highlighting
-- Optional: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) for enhanced references and workspace symbols
-- Optional (for DAP): [nvim-dap](https://github.com/mfussenegger/nvim-dap) and [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
+- [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter)
+- Optional: [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim), [nvim-dap](https://github.com/mfussenegger/nvim-dap), [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
 
 ## 🌱 Why I Created This Plugin
 
-I wanted to use Neovim as my external editor for Godot, enhancing my workflow with its powerful features. However, I had some bad setups that didn’t work, and other plugins didn’t do the trick for my specific needs. Frustrated with the lack of a reliable solution, I decided to make one myself. Debugging is still in progress and not probably stable yet, so expect some rough edges. I am on macOS and haven’t tested this on Linux, though it should work with some adjustments - feedback about this is welcome! I am using Ghostty as my daily driver, but other terminal emulators like Kitty should work too — feel free to try it. There’s no Windows support as I don’t have a Windows machine, and I’m not planning to support it, but contributions are welcome if someone wants to add it.
+I built this to use Neovim as my Godot external editor, frustrated by ineffective setups and plugins. It’s macOS-focused, uses Ghostty, but runs on Linux too. No Windows support yet—contributions welcome! Ooh did I mentioned experimental DAP debugging?
 
-## 📦 Installation
+## 🚀 Quick Start
 
-Install using your preferred Neovim package manager.
+1. Install with **lazy.nvim**:
+   ```lua
+   require("lazy").setup({ { "Mathijs-Bakker/godot-lsp.nvim" } })
+   ```
+   ```
+   :Lazy sync
+   ```
+1. Start Godot: `godot --editor --lsp --verbose`
+1. Configure external editor (see Setup).
+1. Open a `.gd` file in Neovim for LSP features.
 
-### 🐌 With [lazy.nvim](https://github.com/folke/lazy.nvim)
-
-Add to your `init.lua`:
-
-```lua
-require("lazy").setup({
-  {
-    "Mathijs-Bakker/godot-lsp.nvim",
-    config = function()
-      require("godot-lsp").setup({
-        cmd = { "ncat", "localhost", "6005" }, -- Default LSP connection
-        filetypes = { "gdscript" },
-        skip_godot_check = true, -- Skip Godot process check
-        debug_logging = true,    -- Enable debug logs in ~/.cache/nvim/godot-lsp.log
-        dap = true,              -- Enable experimental DAP support
-        keymaps = {              -- Customize LSP and DAP keymaps
-          definition = "gd",
-          declaration = "gD",
-          type_definition = nil, -- Disabled due to lack of Godot LSP support
-          hover = "K",
-          code_action = nil, -- Disabled due to lack of Godot LSP support
-          completion = "<C-x><C-o>",
-          diagnostic_open_float = "<leader>cd",
-          diagnostic_goto_next = "]d",
-          diagnostic_goto_prev = "[d",
-          references = "<leader>cr",
-          rename = "<leader>rn",
-          workspace_symbols = "<leader>ws",
-          format = nil, -- Disable unsupported formatting
-          dap_continue = "<F5>",
-          dap_toggle_breakpoint = "<F9>",
-          dap_step_over = "<F10>",
-          dap_step_into = "<F11>",
-          dap_step_out = "<F12>",
-          dap_ui = "<leader>du",
-        },
-      })
-    end,
-  },
+## ⚙️ Setup
+### 📦 Installation
+Use lazy.nvim:
+```
+luarequire("lazy").setup({
+  { "Mathijs-Bakker/godot-lsp.nvim", config = function() require("godot-lsp").setup() end },
   { "neovim/nvim-lspconfig" },
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = { "gdscript" },
-        highlight = { enable = true, additional_vim_regex_highlighting = false },
-      })
-    end,
-  },
-  { "mfussenegger/nvim-dap", optional = true }, -- For DAP
-  { "rcarriga/nvim-dap-ui", optional = true }, -- For DAP UI
+  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
 })
 ```
-Run `:Lazy sync` to install.
+Then run:
+```
+:Lazy sync
+```
 
-### 🌳 Install TreeSitter Parser
-
-Ensure the `gdscript` parser is installed:
-
-```lua
+### 🌳 TreeSitter Parser
+Install the `gdscript` parser:
+```
 :TSInstall gdscript
 ```
 
-## ⚙️ External Editor Setup
-To open GDScript files from Godot directly in Neovim (running in a terminal) at the exact line and column, use a launch script for consistent behavior and to handle file paths with spaces. Use the full path to the script to avoid issues with ~ expansion.
+### 🌐 External Editor
 
-1. **Create a Launch Script:**
-
-    - Save the following as `/Users/<your-username>/.local/bin/open-nvim-godot.sh` (ensure `/Users/<your-username>/.local/bin` is in your `PATH`):
-      ```bash
-      #!/bin/bash
-      # /Users/<your-username>/.local/bin/open-nvim-godot.sh
-      FILE="$1"
-      LINE="$2"
-      COL="$3"
-      /Applications/Ghostty.app/Contents/MacOS/ghostty -- nvim "$FILE" +"$LINE:$COL"  # macOS with Ghostty
-      # gnome-terminal -- nvim "$FILE" +"$LINE:$COL"  # Linux with gnome-terminal
-      # xterm -e nvim "$FILE" +"$LINE:$COL"  # Linux with xterm
-      ```
-    - Make it executable:
-      ```bash
-      chmod +x /Users/<your-username>/.local/bin/open-nvim-godot.sh
-      ```
-    - Add `/Users/<your-username>/.local/bin` to `PATH` if needed:
-      ```bash
-      echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
-      source ~/.zshrc
-      ```
-2. **Configure Godot:**
-
-    - In Godot, go to `Editor > Editor Settings > Text Editor > External`.
-    - Check `Use External Editor`.
-    - Set **Exec Path**: `/Users/<your-username>/.local/bin/open-nvim-godot.sh`
-    - Set **Exec Flags**: `"{file}" "{line}" "{col}"`
-    - *Note:* Use the full path (e.g., `/Users/LukeSkywalker/.local/bin/open-nvim-godot.sh`) instead of `~/.local/bin/open-nvim-godot.sh` to avoid expansion issues.
+1. Create a launch script (e.g., ~/.local/bin/open-nvim-godot.sh):
+    ```bash
+    #!/bin/bash
+    FILE="$1" LINE="$2" COL="$3"
+    /Applications/Ghostty.app/Contents/MacOS/ghostty -- nvim "$FILE" +"$LINE:$COL"
+    # Linux: gnome-terminal -- nvim "$FILE" +"$LINE:$COL"
+    ```
+1. Make executable: 
+    ```bash
+    chmod +x ~/.local/bin/open-nvim-godot.sh
+    ```
+1. Add to PATH: 
+    ```bash
+    echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc
+    ```
+1. Configure Godot: `Editor > Editor Settings > Text Editor > External` with full path and `"{file}" "{line}" "{col}"`.
 <div align="center"><img src="assets/godot_editor_settings.png"></div>
 
-3. **Open Scripts:**
+### 🎮 Usage
 
-    - Double-click a script in Godot’s **FileSystem dock** or use **File > Open in External Editor**.
-    - Click a specific position in Godot’s script editor to set the cursor, then open in the external editor.
-    - Neovim opens in Ghostty at the specified line and column, with LSP and TreeSitter features enabled.
+- Start Godot with `godot --editor --lsp --verbose`.
+- Open `.gd` files for LSP and TreeSitter features.
+- Use keymaps (see Configuration).
 
-4. **Optional: Reuse Neovim Instance:**
-    - Start Neovim with a server:
-        ```bash
-        nvim --listen ~/.cache/nvim/server.pipe 
-        ```
-    - Modify the script to use:
-        ```bash
-        #!/bin/bash
-        FILE="$1"
-        LINE="$2"
-        COL="$3"
-        NVIM_SERVER="$HOME/.cache/nvim/server.pipe"
-        if [ -S "$NVIM_SERVER" ]; then
-            nvim --server "$NVIM_SERVER" --remote "$FILE" +"$LINE:$COL"
-        else
-            /Applications/Ghostty.app/Contents/MacOS/ghostty -- nvim "$FILE" +"$LINE:$COL"
-        fi
-        ```
-    - The script will open files in the existing instance, preserving multi-buffer support.
 
-## 🚀 Usage
-1. Start Godot with LSP enabled:
-    - Start Godot with LSP enabled:
-    ```bash
-    godot --editor --lsp --verbose
-    ```
-2. Open one or more GDScript files (`.gd`) from Godot or Neovim. The plugin will:
-    - Set `filetype = gdscript` for each buffer.
-    - Enable TreeSitter syntax highlighting for all buffers.
-    - Automatically attach all GDScript buffers to the Godot LSP server (port 6005 via `ncat`).
+<details>
+<summary>Advanced Usage</summary>
 
-3. Use LSP features with the following default keymaps:
-    - `gd`: Go to definition `(textDocument/definition`).
-    - `gD`: Go to declaration `(textDocument/declaration`).
-    - `K`: Show hover documentation `(textDocument/hover)`.
-    - `<C-x><C-o>`: Trigger code completion `(textDocument/completion, in insert mode)`.
-    - `<leader>cd`: Show diagnostics in a floating window `(diagnostic/open_float)`.
-    - `]d`: Go to next diagnostic `(diagnostic/goto_next)`.
-    - `[d`: Go to previous diagnostic `(diagnostic/goto_prev)`.
-    - `<leader>cr`: Show references `(textDocument/references, requires Telescope)`.
-    - `<leader>rn`: Rename symbol `(textDocument/rename)`.
-    - `<leader>ws`: Search workspace symbols `(workspace/symbol, requires Telescope)`.
+- **Keymaps**: `gd` (definition), `K` (hover), `<leader>cd` (diagnostics), etc.
+- **Autocommands**: Auto-attaches buffers, syncs with Godot.
+- See Commands and Configuration for more.
+</details>
 
-4. Diagnostics appear as virtual text, signs, and underlines across all open buffers.
-5. Autocommands handle:
-    - Auto-starting the LSP on `.gd` file open.
-    - Attaching new GDScript buffers to the LSP.
-    - Ensuring TreeSitter highlighting on buffer enter.
-    - Notifying Godot of script changes on save (if supported).
-    - Detaching buffers from LSP on close.
 
-## 🤖 Commands
-- `:GodotLspStart`: Start the Godot LSP client manually.
-- `:GodotLspStatus`: Check if the Godot LSP server is reachable at localhost:6005.
-- `:GodotLspAttachAll`: Attach all loaded GDScript buffers to the LSP client.
+### 🤖 Commands
 
-## 🛠️ Configuration
-Customize the plugin by passing options to `setup`:
+- `:GodotLspStart:` Start LSP manually.
+- `:GodotLspStatus:` Check server status.
+- `:GodotLspAttachAll:` Attach all buffers.
+
+### 🛠️ Configuration
+Customize via `setup`:
 ```lua
 require("godot-lsp").setup({
-  cmd = { "ncat", "localhost", "6005" }, -- LSP command (default)
-  filetypes = { "gdscript" },            -- Filetypes to trigger LSP (default)
-  skip_godot_check = true,              -- Skip checking for Godot process
-  debug_logging = false,                 -- Log debug info to ~/.cache/nvim/godot-lsp.log
-  dap = true,                           -- Enable experimental DAP support
-  keymaps = {                           -- Customize LSP and DAP keymaps
-    definition = "gd",                  -- Go to definition
-    declaration = "gD",                 -- Go to declaration
-    type_definition = "gt",             -- Go to type definition
-    hover = "K",                        -- Show hover documentation
-    code_action = "<leader>ca",         -- Code actions
-    completion = "<C-x><C-o>",          -- Trigger completion (in insert mode)
-    diagnostic_open_float = "<leader>cd", -- Show diagnostics in floating window
-    diagnostic_goto_next = "]d",        -- Go to next diagnostic
-    diagnostic_goto_prev = "[d",        -- Go to previous diagnostic
-    references = "<leader>cr",           -- Show references (requires Telescope)
-    rename = "<leader>rn",              -- Rename symbol
-    workspace_symbols = "<leader>ws",    -- Search workspace symbols (requires Telescope)
-    format = "<leader>f",               -- Format buffer
-    dap_continue = "<F5>",              -- Continue debugging
-    dap_toggle_breakpoint = "<F9>",     -- Toggle breakpoint
-    dap_step_over = "<F10>",            -- Step over
-    dap_step_into = "<F11>",            -- Step into
-    dap_step_out = "<F12>",             -- Step out
-    dap_ui = "<leader>du",              -- Toggle DAP UI
-    -- Set to nil or false to disable a keymap
-  },
+  cmd = { "ncat", "localhost", "6005" },
+  keymaps = { definition = "gd", hover = "K", format = nil },
 })
 ```
-To disable a keymap, set it to nil or false:
-```lua
-keymaps = {
-  code_action = nil, -- Disable code action keymap
-}
-```
 ## 📋 Debug Logging
-Enable `debug_logging = true` to write debug messages (e.g., buffer attachment, TreeSitter status) to `~/.cache/nvim/godot-lsp.log`. Useful for troubleshooting.
+Enable with `debug_logging = true` for logs in `~/.cache/nvim/godot-lsp.log`.
 
-## 🪲 DAP Debugging (Experimental)
-To enable debugging:
-1. Install `nvim-dap` and `nvim-dap-ui` (see Requirements).
-2. Set `dap = true` in the `setup` configuration.
-3. Start Godot with remote debugging:
-    ```bash
-    godot --remote-debug localhost:6006 --editor
-    ```
-4. Use the following keymaps:
-    - `<F5>`: Continue debugging.
-    - `<F9>`: Toggle breakpoint.
-    - `<F10>`: Step over.
-    - `<F11>`: Step into.
-    - `<F12>`: Step out.
-    - `<leader>du`: Toggle DAP UI.
+## 🪲 DAP Debugging
+Enable with `dap = true` and `godot --remote-debug localhost:6006 --editor`.  
+Use: 
+- `<F5>` (continue),
+- `<F9>` (breakpoint), 
+- etc.
 
-5. Adjust the `program path` in the DAP configuration to match your Godot project (e.g., `/path/to/your/project.godot`).
-**Note**: This is experimental and requires Godot to run with `--remote-debug`. Feedback is welcome to improve compatibility.
+# 🕵🏻‍♂️ Troubleshooting
 
-## 🕵🏻‍♂️ Troubleshooting
-
-- **LSP not starting:**
-    - Ensure Godot is running with `--lsp` (`godot --editor --lsp --verbose`).
-    - Verify `ncat` is installed and accessible.
-    - Run `:GodotLspStatus` to check server connectivity.
-    - Check `~/.cache/nvim/lsp.log` with `:LspLog`.
-- **No syntax highlighting:**
-    - Ensure `nvim-treesitter` is installed and gdscript parser is active (`:TSInstall gdscript`).
-    - Run `:lua print(vim.inspect(require("nvim-treesitter.configs").get_module("highlight")))` to verify `enable = true`.
-- **Slow or missing diagnostics:**
-    - Diagnostics may be slow or persist for deleted files due to Godot LSP limitations.
-    - Check `~.cache/nvim/godot-lsp.log` with `debug_logging = true`.
-- **Crashes during completion:**
-    - Avoid triggering completion while running a game in the editor, as it may crash.
-- **External editor issues:**
-    - Test the launch script manually:
-        ```bash
-        /Users/<your-username>/.local/bin/open-nvim-godot.sh "/path/to/test script.gd" 10 5
-        ```
-    - Ensure `/Users/<your-username>/.local/bin` is in `PATH` (echo $PATH).
-    - Verify script permissions: `ls -l /Users/<your-username>/.local/bin/open-nvim-godot.sh` (should show `-rwxr-xr-x`).
-    - Test Ghostty directly:
-        ```bash
-        /Applications/Utilities/Terminal.app/Contents/MacOS/Terminal -a nvim "/path/to/test script.gd" +10:5
-        ```
-    - Ensure **Exec Path** uses the full path (`/Users/<your-username>/.local/bin/open-nvim-godot.sh`), not `~/.local/bin/open-nvim-godot.sh`.
-    - Check Godot’s output console for errors when opening the external editor.
-- **DAP not working:**
-    - Ensure `nvim-dap` and `nvim-dap-ui` are installed.
-    - Verify Godot is running with `--remote-debug localhost:6006`.
-    - Check the `program` path in the DAP configuration.
-    - Enable `debug_logging = true` and inspect `~/.cache/nvim/godot-lsp.log`.
-- **Debug logs:**
-    - Enable `debug_logging = true` and check `~/.cache/nvim/godot-lsp.log`.
-    - Run `:lua print(vim.inspect(vim.lsp.get_clients({ name = "godot_lsp" })))` to verify one `godot_lsp` client.
-- **Type Definition Not Supported:**
-    Godot’s LSP server does not support `textDocument/typeDefinition`. The `gt` keymap is disabled by default; use `gd` for definitions instead.
-- **Code Actions Not Supported:**
-    - Godot’s LSP server does not support `textDocument/codeAction`. The `<leader>ca` keymap is disabled by default; this feature is unavailable.
-- **Implementation Not Supported**:
-  - Godot’s LSP server does not support `textDocument/implementation`. This capability is unavailable and may trigger a warning if invoked manually.
-
-## ✅ Example Setup:
-Here is an complete example of a Lazy.nvim setup. Place it in `~/.config/nvim/lua/<your-lazy-plugin-folder>/godot-lsp.lua`. So it gets autoloaded.
-
-```lua
-return {
-  'Mathijs-Bakker/godot-lsp.nvim',
-  branch = 'master',
-  dependencies = { 'neovim/nvim-lspconfig' },
-  config = function()
-    local lspconfig_status_ok, lspconfig = pcall(require, 'lspconfig')
-    if not lspconfig_status_ok then
-      vim.notify('nvim-lspconfig not found. Please ensure it is installed and loaded.', vim.log.levels.ERROR)
-      return
-    end
-
-    local status_ok, godot_lsp = pcall(require, 'godot-lsp')
-    if not status_ok then
-      vim.notify('godot-lsp.nvim not found, install it with :Lazy sync', vim.log.levels.ERROR)
-      return
-    end
-
-    godot_lsp.setup {
-      cmd = { 'ncat', 'localhost', '6005' },
-      filetypes = { 'gdscript' },
-      skip_godot_check = true,
-      debug_logging = true,
-      dap = true,
-      keymaps = {
-        definition = 'gd',
-        declaration = 'gD',
-        type_definition = nil,  -- Disabled due to lack of Godot LSP support
-        hover = 'K',
-        code_action = nil,      -- Disabled due to lack of Godot LSP support
-        completion = '<C-x><C-o>',
-        diagnostic_open_float = '<leader>cd',
-        diagnostic_goto_next = ']d',
-        diagnostic_goto_prev = '[d',
-        references = '<leader>cr',
-        rename = '<leader>rn',
-        workspace_symbols = '<leader>ws',
-        format = nil,           -- Disabled due to lack of Godot LSP support
-        dap_continue = '<F5>',
-        dap_toggle_breakpoint = '<F9>',
-        dap_step_over = '<F10>',
-        dap_step_into = '<F11>',
-        dap_step_out = '<F12>',
-        dap_ui = '<leader>du',
-      },
-    }
-  end,
-}
-```
-
-## Simular Projects
-- [Lommix/godot.nvim](https://github.com/Lommix/godot.nvim) - Minimalist Godot debugging tool for Neovim.
-- [niscolas/nvim-godot](https://github.com/niscolas/nvim-godot) - Godot LSP features.
-- [QuickGD/quickgd.nvim](https://github.com/QuickGD/quickgd.nvim) - Auto-completion for gdshader.
-- [upperhands/godot-neovim](https://github.com/upperhands/godot-neovim) - Keymaps for Godot commands (run scene, show documentation).
-- [Cretezy/godot-server.nvim](https://github.com/Cretezy/godot-server.nvim) - Open files from Godot in Neovim.
+Common Issues: LSP not starting, no syntax highlighting, DAP failures.  
+Details: See full [troubleshooting](docs/TROUBLESHOOTING.md) for steps and workarounds.
 
 ## 🤝 Contributing
-Contributions are welcome! Submit issues or pull requests to github.com/username/godot-lsp.nvim.
+Submit issues or PRs at github.com/Mathijs-Bakker/godot-lsp.nvim.
 
 ## 📄 License
-MIT License
+[MIT License](LICENSE.md)
+
