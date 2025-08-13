@@ -156,5 +156,5 @@ Details: See full [troubleshooting](docs/TROUBLESHOOTING.md) for steps and worka
 Submit issues or PRs at github.com/Mathijs-Bakker/godot-lsp.nvim.
 
 ## 📄 License
-[MIT License](LICENSE.md)
+[MIT License](LICENSE)
 
