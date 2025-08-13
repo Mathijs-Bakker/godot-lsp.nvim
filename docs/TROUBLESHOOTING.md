@@ -69,7 +69,7 @@ This document provides detailed steps to diagnose and resolve common issues with
 
 ### Godot LSP Limitations
 
-Godot's built-in LSP for GDScript is functional but less robust than servers like _clangd_ or _pyright_ due to its dynamic nature and partial implementation. Key supported features include _diagnostics, go-to-definition, hover,_ and _autocomplete_, while limitations include missing _type definition, code actions,_ and _formatting_. For a detailed breakdown, see [Godot LSP Capabilities](godot_lsp_capabilities). 
+Godot's built-in LSP for GDScript is functional but less robust than servers like _clangd_ or _pyright_ due to its dynamic nature and partial implementation. Key supported features include _diagnostics, go-to-definition, hover,_ and _autocomplete_, while limitations include missing _type definition, code actions,_ and _formatting_. For a detailed breakdown, see [Godot LSP Capabilities](godot_lsp_capabilities.md). 
 
 Workarounds:
 -   Use `gd` instead of `gt` for `definitions`.
