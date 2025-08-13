@@ -70,9 +70,9 @@ require("lazy").setup({
         keymaps = {              -- Customize LSP and DAP keymaps
           definition = "gd",
           declaration = "gD",
-          type_definition = "gt",
+          type_definition = nil, -- Disabled due to lack of Godot LSP support
           hover = "K",
-          code_action = "<leader>ca",
+          code_action = nil, -- Disabled due to lack of Godot LSP support
           completion = "<C-x><C-o>",
           diagnostic_open_float = "<leader>cd",
           diagnostic_goto_next = "]d",
@@ -80,7 +80,7 @@ require("lazy").setup({
           references = "<leader>cr",
           rename = "<leader>rn",
           workspace_symbols = "<leader>ws",
-          format = "<leader>f",
+          format = nil, -- Disable unsupported formatting
           dap_continue = "<F5>",
           dap_toggle_breakpoint = "<F9>",
           dap_step_over = "<F10>",
@@ -190,9 +190,7 @@ To open GDScript files from Godot directly in Neovim (running in a terminal) at 
 3. Use LSP features with the following default keymaps:
     - `gd`: Go to definition `(textDocument/definition`).
     - `gD`: Go to declaration `(textDocument/declaration`).
-    - `gt`: Go to type definition `(textDocument/typeDefinition)`.
     - `K`: Show hover documentation `(textDocument/hover)`.
-    - `<leader>ca`: Open code actions `(textDocument/codeAction)`.
     - `<C-x><C-o>`: Trigger code completion `(textDocument/completion, in insert mode)`.
     - `<leader>cd`: Show diagnostics in a floating window `(diagnostic/open_float)`.
     - `]d`: Go to next diagnostic `(diagnostic/goto_next)`.
@@ -200,7 +198,6 @@ To open GDScript files from Godot directly in Neovim (running in a terminal) at 
     - `<leader>cr`: Show references `(textDocument/references, requires Telescope)`.
     - `<leader>rn`: Rename symbol `(textDocument/rename)`.
     - `<leader>ws`: Search workspace symbols `(workspace/symbol, requires Telescope)`.
-    - `<leader>f`: Format buffer `(textDocument/formatting)`.
 
 4. Diagnostics appear as virtual text, signs, and underlines across all open buffers.
 5. Autocommands handle:
@@ -304,16 +301,20 @@ To enable debugging:
         ```
     - Ensure **Exec Path** uses the full path (`/Users/<your-username>/.local/bin/open-nvim-godot.sh`), not `~/.local/bin/open-nvim-godot.sh`.
     - Check Godot’s output console for errors when opening the external editor.
-
 - **DAP not working:**
     - Ensure `nvim-dap` and `nvim-dap-ui` are installed.
     - Verify Godot is running with `--remote-debug localhost:6006`.
     - Check the `program` path in the DAP configuration.
     - Enable `debug_logging = true` and inspect `~/.cache/nvim/godot-lsp.log`.
-
 - **Debug logs:**
     - Enable `debug_logging = true` and check `~/.cache/nvim/godot-lsp.log`.
     - Run `:lua print(vim.inspect(vim.lsp.get_clients({ name = "godot_lsp" })))` to verify one `godot_lsp` client.
+- **Type Definition Not Supported:**
+    Godot’s LSP server does not support `textDocument/typeDefinition`. The `gt` keymap is disabled by default; use `gd` for definitions instead.
+- **Code Actions Not Supported:**
+    - Godot’s LSP server does not support `textDocument/codeAction`. The `<leader>ca` keymap is disabled by default; this feature is unavailable.
+- **Implementation Not Supported**:
+  - Godot’s LSP server does not support `textDocument/implementation`. This capability is unavailable and may trigger a warning if invoked manually.
 
 ## ✅ Example Setup:
 Here is an complete example of a Lazy.nvim setup. Place it in `~/.config/nvim/lua/<your-lazy-plugin-folder>/godot-lsp.lua`. So it gets autoloaded.
@@ -345,9 +346,9 @@ return {
       keymaps = {
         definition = 'gd',
         declaration = 'gD',
-        type_definition = 'gt',
+        type_definition = nil,  -- Disabled due to lack of Godot LSP support
         hover = 'K',
-        code_action = '<leader>ca',
+        code_action = nil,      -- Disabled due to lack of Godot LSP support
         completion = '<C-x><C-o>',
         diagnostic_open_float = '<leader>cd',
         diagnostic_goto_next = ']d',
@@ -355,7 +356,7 @@ return {
         references = '<leader>cr',
         rename = '<leader>rn',
         workspace_symbols = '<leader>ws',
-        format = '<leader>f',
+        format = nil,           -- Disabled due to lack of Godot LSP support
         dap_continue = '<F5>',
         dap_toggle_breakpoint = '<F9>',
         dap_step_over = '<F10>',
@@ -370,7 +371,7 @@ return {
 
 ## Simular Projects
 - [Lommix/godot.nvim](https://github.com/Lommix/godot.nvim) - Minimalist Godot debugging tool for Neovim.
-- [niscolas/nvim-godot](https://github.com/niscolas/nvim-godot) - Godot LSP feautures.
+- [niscolas/nvim-godot](https://github.com/niscolas/nvim-godot) - Godot LSP features.
 - [QuickGD/quickgd.nvim](https://github.com/QuickGD/quickgd.nvim) - Auto-completion for gdshader.
 - [upperhands/godot-neovim](https://github.com/upperhands/godot-neovim) - Keymaps for Godot commands (run scene, show documentation).
 - [Cretezy/godot-server.nvim](https://github.com/Cretezy/godot-server.nvim) - Open files from Godot in Neovim.
