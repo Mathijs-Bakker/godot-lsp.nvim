@@ -77,6 +77,78 @@ Workarounds:
 -   Use `gd` instead of `gt` for `definitions`.
 -   Install gdformat (`pip install gdtoolkit`) for formatting: `:!gdformat %`.
 
+## 🛠️ Example Setup
+
+Here is a complete example of a `lazy.nvim` setup, including `nvim-treesitter` for syntax highlighting. Place it in `~/.config/nvim/lua/<your-lazy-plugin-folder>/godot-lsp.lua` to be autoloaded.
+
+```lua
+return {
+  'Mathijs-Bakker/godot-lsp.nvim',
+  branch = 'master',
+  dependencies = { 'neovim/nvim-lspconfig' },
+  config = function()
+    local lspconfig_status_ok, lspconfig = pcall(require, 'lspconfig')
+    if not lspconfig_status_ok then
+      vim.notify('nvim-lspconfig not found. Please ensure it is installed and loaded.', vim.log.levels.ERROR)
+      return
+    end
+
+    local status_ok, godot_lsp = pcall(require, 'godot-lsp')
+    if not status_ok then
+      vim.notify('godot-lsp.nvim not found, install it with :Lazy sync', vim.log.levels.ERROR)
+      return
+    end
+
+    godot_lsp.setup {
+      cmd = { 'ncat', 'localhost', '6005' },
+      filetypes = { 'gdscript' },
+      skip_godot_check = true,
+      debug_logging = true,
+      dap = true,
+      keymaps = {
+        definition = 'gd',
+        declaration = 'gD',
+        type_definition = nil,  -- Disabled due to lack of Godot LSP support
+        hover = 'K',
+        code_action = nil,      -- Disabled due to lack of Godot LSP support
+        completion = '<C-x><C-o>',
+        diagnostic_open_float = '<leader>cd',
+        diagnostic_goto_next = ']d',
+        diagnostic_goto_prev = '[d',
+        references = '<leader>cr',
+        rename = '<leader>rn',
+        workspace_symbols = '<leader>ws',
+        format = nil,           -- Disabled due to lack of Godot LSP support
+        dap_continue = '<F5>',
+        dap_toggle_breakpoint = '<F9>',
+        dap_step_over = '<F10>',
+        dap_step_into = '<F11>',
+        dap_step_out = '<F12>',
+        dap_ui = '<leader>du',
+      },
+    }
+  end,
+},
+{
+  'nvim-treesitter/nvim-treesitter',
+  build = ':TSUpdate',
+  config = function()
+    require('nvim-treesitter.configs').setup {
+      ensure_installed = { 'gdscript' },
+      highlight = { enable = true, additional_vim_regex_highlighting = false },
+    }
+  end,
+},
+{
+  'mfussenegger/nvim-dap',
+  optional = true,
+},
+{
+  'rcarriga/nvim-dap-ui',
+  optional = true,
+}
+```
+
 ### ℹ️ Additional Notes
 
 -   **Linux Compatibility:** Untested but should work with `ncat` and terminal emulators like `gnome-terminal` or `xterm`. Feedback is welcome!
