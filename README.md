@@ -122,7 +122,6 @@ Install the `gdscript` parser:
 - See [Commands](#-commands) and [Configuration](%EF%B8%8F-configuration) for more.
 </details>
 
-
 ### 🤖 Commands
 
 - `:GodotLspStart:` Start LSP manually.
@@ -137,6 +136,8 @@ require("godot-lsp").setup({
   keymaps = { definition = "gd", hover = "K", format = nil },
 })
 ```
+You can find a complete setup example [here](docs/TROUBLESHOOTING.md#%EF%B8%8F-example-setup).
+
 ## 📋 Debug Logging
 Enable with `debug_logging = true` for logs in `~/.cache/nvim/godot-lsp.log`.
 
@@ -149,7 +150,7 @@ Use:
 
 # 🕵🏻‍♂️ Troubleshooting
 
-Common Issues: LSP not starting, no syntax highlighting, DAP failures.  
+Common Issues: LSP not starting, no syntax highlighting, DAP failures, plugin setup.  
 Details: See full [troubleshooting](docs/TROUBLESHOOTING.md) for steps and workarounds.
 
 ## 🤝 Contributing
