@@ -6,22 +6,22 @@ A Neovim plugin to integrate Godot's LSP for GDScript, providing features like _
 
 ## 📑 Table of Contents
 
-- [✨ Features](#features)
-- [❗ Requirements](#requirements)
-- [🌱 Why I Created This Plugin](#why-i-created-this-plugin)
-- [🚀 Quick Start](#quick-start)
-- [⚙️ Setup](#setup)
-  - [📦 Installation](#installation)
-  - [🌳 TreeSitter Parser](#treesitter-parser)
-  - [🌐 External Editor](#external-editor)
-- [🎮 Usage](#usage)
-  - [🤖 Commands](#commands)
-  - [🛠️ Configuration](#configuration)
-  - [📋 Debug Logging](#debug-logging)
-  - [🪲 DAP Debugging](#dap-debugging)
-- [🕵🏻‍♂️ Troubleshooting](#troubleshooting)
-- [🤝 Contributing](#contributing)
-- [📄 License](#license)
+- [✨ Features](#-features)
+- [❗ Requirements](#-requirements)
+- [🌱 Why I Created This Plugin](#-why-i-created-this-plugin)
+- [🚀 Quick Start](#-quick-start)
+- [⚙️ Setup](#%EF%B8%8F-setup)
+  - [📦 Installation](#-installation)
+  - [🌳 TreeSitter Parser](#-treesitter-parser)
+  - [🌐 External Editor](#-external-editor)
+- [🎮 Usage](#-usage)
+  - [🤖 Commands](#-commands)
+  - [🛠️ Configuration](#%EF%B8%8F-configuration)
+  - [📋 Debug Logging](#-debug-logging)
+  - [🪲 DAP Debugging](#-dap-debugging)
+- [🕵🏻‍♂️ Troubleshooting](#%EF%B8%8F-troubleshooting)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
 
 ## ✨ Features
 
@@ -90,7 +90,7 @@ Install the `gdscript` parser:
 
 ### 🌐 External Editor
 
-1. Create a launch script (e.g., ~/.local/bin/open-nvim-godot.sh):
+1. Create a launch script (e.g., `~/.local/bin/open-nvim-godot.sh`):
     ```bash
     #!/bin/bash
     FILE="$1" LINE="$2" COL="$3"
@@ -114,13 +114,12 @@ Install the `gdscript` parser:
 - Open `.gd` files for LSP and TreeSitter features.
 - Use keymaps (see Configuration).
 
-
 <details>
 <summary>Advanced Usage</summary>
 
 - **Keymaps**: `gd` (definition), `K` (hover), `<leader>cd` (diagnostics), etc.
 - **Autocommands**: Auto-attaches buffers, syncs with Godot.
-- See Commands and Configuration for more.
+- See [Commands](#-commands) and [Configuration](%EF%B8%8F-configuration) for more.
 </details>
 
 
