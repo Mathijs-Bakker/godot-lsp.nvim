@@ -1,3 +1,5 @@
+<div align="center"><img src="../assets/logo_godot-lsp-nvim.svg" width="150"></div>
+
 # Godot LSP Capabilities
 
 Godot’s built-in Language Server Protocol (LSP) implementation for GDScript is functional but not on the same level as something like `clangd` or `pyright` due to the dynamic nature of GDScript and a partial implementation of the LSP specification. This document breaks down what’s possible, what’s not, and the reasons behind these limitations.
