@@ -205,12 +205,22 @@ function M.setup(opts)
     desc = "Ensure TreeSitter highlighting for GDScript",
   })
 
+  -- reloadScript not (yet?) supported by Godot
+  -- vim.api.nvim_create_autocmd("BufWritePost", {
+  --   pattern = "*.gd",
+  --   callback = function()
+  --     vim.lsp.buf_notify(0, "godot/reloadScript", { uri = vim.uri_from_bufnr(0) })
+  --   end,
+  --   desc = "Notify Godot to reload script on save",
+  -- })
+
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.gd",
     callback = function()
-      vim.lsp.buf_notify(0, "godot/reloadScript", { uri = vim.uri_from_bufnr(0) })
+      local file = vim.fn.expand "%:p" -- Full path of the current file
+      vim.fn.system { vim.fn.expand "~/.local/bin/open-nvim-godot.sh", file, "1", "1", "reload" }
     end,
-    desc = "Notify Godot to reload script on save",
+    desc = "Reload script in Godot on save via launch script",
   })
 
   vim.api.nvim_create_autocmd("BufDelete", {
