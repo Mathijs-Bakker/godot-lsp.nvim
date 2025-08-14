@@ -205,7 +205,7 @@ function M.setup(opts)
     desc = "Ensure TreeSitter highlighting for GDScript",
   })
 
-  -- reloadScript not (yet?) supported by Godot
+  -- godot/reloadScript not supported by Godot
   -- vim.api.nvim_create_autocmd("BufWritePost", {
   --   pattern = "*.gd",
   --   callback = function()
@@ -217,8 +217,14 @@ function M.setup(opts)
   vim.api.nvim_create_autocmd("BufWritePost", {
     pattern = "*.gd",
     callback = function()
-      local file = vim.fn.expand "%:p" -- Full path of the current file
-      vim.fn.system { vim.fn.expand "~/.local/bin/open-nvim-godot.sh", file, "1", "1", "reload" }
+      local file = vim.fn.expand "%:p"
+      -- Check if Godot is running (basic check via system call)
+      local godot_running = vim.fn.system "pgrep -f 'godot.*--editor'" ~= ""
+      if godot_running then
+        vim.fn.system { vim.fn.expand "~/.local/bin/open-nvim-godot.sh", file, "1", "1", "reload" }
+      else
+        vim.notify("Godot editor not running. Please start Godot with --editor --lsp --verbose.", vim.log.levels.WARN)
+      end
     end,
     desc = "Reload script in Godot on save via launch script",
   })

@@ -1,24 +1,4 @@
 #!/bin/bash
-
-# Define installation directory
-INSTALL_DIR="$HOME/.local/bin"
-
-# Create directory if it doesn't exist
-if [ ! -d "$INSTALL_DIR" ]; then
-  mkdir -p "$INSTALL_DIR"
-  if [ $? -ne 0 ]; then
-    echo "Failed to create directory $INSTALL_DIR. Please check permissions."
-    exit 1
-  fi
-fi
-
-# Define file paths
-OPEN_NVM_SCRIPT="$INSTALL_DIR/open-nvim-godot.sh"
-RELOAD_GD="$INSTALL_DIR/reload.gd"
-
-# Content for open-nvim-godot.sh
-cat << 'EOF' > "$OPEN_NVM_SCRIPT"
-#!/bin/bash
 FILE="$1"
 LINE="$2"
 COL="$3"
@@ -46,25 +26,24 @@ find_terminal() {
   # Define terminals based on platform
   if [ "$PLATFORM" = "linux" ]; then
     terminals=(
-      "alacritty"      # Alacritty (cross-platform)
-      "ghostty"        # Ghostty (cross-platform)
-      "gnome-terminal" # Gnome Terminal (Linux)
-      "guake"          # Guake (Linux)
       "kitty"          # Kitty (cross-platform)
-      "konsole"        # Konsole (Linux)
+      "alacritty"      # Alacritty (cross-platform)
       "wezterm"        # Wezterm (cross-platform)
+      "konsole"        # Konsole (Linux)
       "xterm"          # xterm (Linux)
+      "guake"          # Guake (Linux)
+      "gnome-terminal" # Gnome Terminal (Linux)
+      "ghostty"        # Ghostty (cross-platform)
     )
   elif [ "$PLATFORM" = "macos" ]; then
     terminals=(
-      "alacritty"      # Alacritty (cross-platform)
-      "ghostty"        # Ghostty (cross-platform)
-      "hyper"          # Hyper (cross-platform)
-      "iterm2"         # iTerm2 (macOS)
-      "kitty"          # Kitty (cross-platform)
-      "open -a Terminal" # macOS Terminal
       "warp"           # Warp (macOS)
+      "alacritty"      # Alacritty (cross-platform)
+      "hyper"          # Hyper (cross-platform)
       "wezterm"        # Wezterm (cross-platform)
+      "iterm2"         # iTerm2 (macOS)
+      "open -a Terminal" # macOS Terminal
+      "ghostty"        # Ghostty (cross-platform)
     )
   fi
 
@@ -141,50 +120,23 @@ case "$ACTION" in
     $TERM_CMD "$FILE" +"$LINE:$COL"
     ;;
   "reload")
-    DIR="$(dirname "$0")"
-    godot --script "$DIR/reload.gd" -- "$FILE"
+    # Check for running Godot instance and attempt remote reload
+    if pgrep -f "godot.*--editor" > /dev/null; then
+      # Attempt to send a remote command (e.g., via debug port if configured)
+      # Note: This requires Godot to be started with --remote-debug
+      # For now, this is a placeholder; Godot doesn't support direct reload via CLI
+      echo "Attempting to reload $FILE in existing Godot instance..."
+      # Fallback to script execution if remote reload isn't supported
+      DIR="$(dirname "$0")"
+      godot --script "$DIR/reload.gd" -- "$FILE"
+    else
+      echo "No running Godot editor instance detected. Starting new instance to reload $FILE..."
+      DIR="$(dirname "$0")"
+      godot --script "$DIR/reload.gd" -- "$FILE"
+    fi
     ;;
   *)
     echo "Unknown action: $ACTION"
     exit 1
     ;;
 esac
-EOF
-
-# Content for reload.gd
-cat << 'EOF' > "$RELOAD_GD"
-tool
-extends EditorScript
-
-func _run():
-    var file_path = ARGV[0]
-    var script = load(file_path)
-    if script:
-        print("Reloaded: ", file_path)
-    else:
-        print("Failed to reload: ", file_path)
-EOF
-
-# Set executable permissions
-chmod +x "$OPEN_NVM_SCRIPT"
-if [ $? -ne 0 ]; then
-  echo "Failed to set executable permission for $OPEN_NVM_SCRIPT."
-  exit 1
-fi
-
-# Verify installation
-if [ -f "$OPEN_NVM_SCRIPT" ] && [ -f "$RELOAD_GD" ]; then
-  echo "Installation successful! Files are located at:"
-  echo "  - $OPEN_NVM_SCRIPT"
-  echo "  - $RELOAD_GD"
-  echo "Note: Ensure one of the following terminals is installed:"
-  echo "  - Linux: Kitty, Alacritty, Wezterm, Konsole, Xterm, Guake, Gnome Terminal, or Ghostty"
-  echo "    - Install with 'sudo apt install kitty alacritty wezterm konsole xterm guake gnome-terminal ghostty' (Debian/Ubuntu), etc."
-  echo "  - macOS: Warp, Alacritty, Hyper, Wezterm, iTerm2, Terminal, or Ghostty"
-  echo "    - iTerm2 and Terminal are preinstalled; install Warp, Alacritty, Hyper, Wezterm, or Ghostty if preferred."
-  echo "To set your preferred terminal (e.g., Guake), add 'export PREFERRED_TERMINAL=\"guake\"' to your ~/.bashrc or ~/.zshrc and run 'source ~/.bashrc'."
-  echo "Please ensure Godot is in your PATH and test the setup."
-else
-  echo "Installation failed. Please check the script and try again."
-  exit 1
-fi
