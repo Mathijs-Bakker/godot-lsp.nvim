@@ -69,18 +69,78 @@ I built this to use Neovim as my Godot external editor, frustrated by ineffectiv
 
 ## ⚙️ Setup
 ### 📦 Installation
-Use lazy.nvim:
+
+<details>
+<summary>Prerequisites</summary>
+
+- **Neovim**: Version 0.9.0 or higher.
+- **Godot**: Version 4.3+ with LSP enabled (run with `godot --editor --lsp --verbose`).
+- **ncat**: Required for LSP communication (install with `brew install ncat` on macOS or `apt install ncat` on Linux).
+- **Terminal Emulator**: One of the following must be installed:
+  - **Linux**: Kitty, Alacritty, Wezterm, Konsole, Xterm, Guake, GNOME Terminal, or Ghostty.
+    - Install with `sudo apt install kitty alacritty wezterm konsole xterm guake gnome-terminal ghostty` (Debian/Ubuntu) or equivalent.
+  - **macOS**: Warp, Alacritty, Hyper, Wezterm, iTerm2, Terminal, or Ghostty.
+    - iTerm2 and Terminal are preinstalled; install others if preferred (e.g., via Homebrew).
+- **nvim-lspconfig**: Required dependency for LSP functionality.
+</details>  
+
+### Plugin Installation
+Install using your preferred plugin manager (e.g., `lazy.nvim`, `packer.nvim`):
+
+#### With lazy.nvim
+Add the following to your `lua/plugins.lua` or equivalent:
+
+```lua
+return {
+  'Mathijs-Bakker/godot-lsp.nvim',
+  branch = 'master',
+  dependencies = { 'neovim/nvim-lspconfig' },
+  config = function()
+    require('godot-lsp').setup {
+      cmd = { 'ncat', 'localhost', '6005' },
+      filetypes = { 'gdscript' },
+      skip_godot_check = true,
+      debug_logging = true, -- Enable for troubleshooting
+    }
+  end,
+}
 ```
-luarequire("lazy").setup({
-  { "Mathijs-Bakker/godot-lsp.nvim", config = function() require("godot-lsp").setup() end },
-  { "neovim/nvim-lspconfig" },
-  { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
-})
+With packer.nvim
+Add to your `plugins.lua`:
+
+```lua
+use {
+  'Mathijs-Bakker/godot-lsp.nvim',
+  branch = 'master',
+  requires = { 'neovim/nvim-lspconfig' },
+  config = function()
+    require('godot-lsp').setup {
+      cmd = { 'ncat', 'localhost', '6005' },
+      filetypes = { 'gdscript' },
+      skip_godot_check = true,
+      debug_logging = true, -- Enable for troubleshooting
+    }
+  end,
+}
 ```
-Then run:
+### Script Reloading Installation
+To enable script reloading on save, install the supporting scripts:
+
+1. **Download the Installation Script:**
+   - Download the script from the repository: [install_godot_lsp_tools.sh](https://github.com/Mathijs-Bakker/godot-lsp.nvim/raw/master/install_godot_lsp_tools.sh)
+1. **Run the Installation Script:**
+   - Make it executable: `chmod +x install_godot_lsp_tools.sh`
+   - Execute it: `bash install_godot_lsp_tools.sh`
+   - This installs `open-nvim-godot.sh` and `reload.gd` in `~/.local/bin/`.    
+1. Configure PATH:
+    - Ensure `~/.local/bin` is in your `PATH` by adding export `PATH="$HOME/.local/bin:$PATH"` to your `~/.bashrc` or `~/.zshrc` and running `source ~/.bashrc`.
+
+### Optional: Set Preferred Terminal
+To enforce your preferred terminal (e.g., Guake on Linux or Warp on macOS), add the following to your `~/.bashrc` or `~/.zshrc`:
+```bash
+bashexport PREFERRED_TERMINAL="guake" # Or "warp" for macOS
 ```
-:Lazy sync
-```
+Then run `source ~/.bashrc` to apply the change.
 
 ### 🌳 TreeSitter Parser
 Install the `gdscript` parser:
