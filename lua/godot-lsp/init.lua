@@ -45,7 +45,7 @@ function M.setup(opts)
   }
   default_capabilities.documentFormattingProvider = false
   default_capabilities.documentRangeFormattingProvider = false
-  vim.lsp.set_client_capabilities(default_capabilities)
+  vim.lsp.set_client_capabilities(default_capabilities) -- Correct method to set capabilities
 
   -- Debug: Check if lspconfig is available
   local status_ok, lspconfig = pcall(require, "lspconfig")
