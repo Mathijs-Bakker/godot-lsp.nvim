@@ -54,8 +54,8 @@ function M.setup(opts)
   custom_capabilities.documentRangeFormattingProvider = false
 
   -- Register godot_lsp in lspconfig.configs globally (once)
-  if not lspconfig.configs.godot_lsp then
-    lspconfig.configs.godot_lsp = {
+  if not lspconfig.godot_lsp then -- Check if godot_lsp is already defined
+    lspconfig.godot_lsp = {
       default_config = {
         cmd = opts.cmd,
         filetypes = opts.filetypes,
@@ -70,10 +70,6 @@ function M.setup(opts)
           root_dir = [[vim.fs.dirname(vim.fs.find({'project.godot'}, { upward = true })[1])]],
         },
       },
-      on_new_config = function(new_config, new_root_dir)
-        new_config.cmd = opts.cmd
-        new_config.capabilities = custom_capabilities -- Apply custom capabilities to new configs
-      end,
     }
     vim.notify("Registered godot_lsp client with lspconfig", vim.log.levels.INFO)
   else
