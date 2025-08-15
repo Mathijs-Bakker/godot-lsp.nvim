@@ -134,7 +134,7 @@ function M.setup(opts)
   if not godot_lsp_client_id then
     local success, err = pcall(function()
       -- Attempt to start client directly with custom capabilities
-      local client = vim.lsp.start {
+      local client_id = vim.lsp.start {
         name = "godot_lsp",
         cmd = opts.cmd,
         root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
@@ -149,8 +149,8 @@ function M.setup(opts)
           end,
         },
       }
-      if client then
-        godot_lsp_client_id = client.id
+      if client_id then
+        godot_lsp_client_id = client_id
         vim.notify(
           "Started godot_lsp client (id: " .. godot_lsp_client_id .. ") with custom capabilities",
           vim.log.levels.INFO
@@ -309,7 +309,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("GodotLspStart", function()
     local success, err = pcall(function()
       if not godot_lsp_client_id then
-        local client = vim.lsp.start {
+        local client_id = vim.lsp.start {
           name = "godot_lsp",
           cmd = opts.cmd,
           root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
@@ -324,8 +324,8 @@ function M.setup(opts)
             end,
           },
         }
-        if client then
-          godot_lsp_client_id = client.id
+        if client_id then
+          godot_lsp_client_id = client_id
           vim.notify(
             "Started godot_lsp client (id: " .. godot_lsp_client_id .. ") with custom capabilities",
             vim.log.levels.INFO
