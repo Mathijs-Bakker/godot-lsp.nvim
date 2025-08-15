@@ -74,6 +74,12 @@ function M.setup(opts)
   local on_attach = function(client, bufnr)
     godot_lsp_client_id = client.id
     vim.notify("Attached godot_lsp client (id: " .. godot_lsp_client_id .. ") to buffer " .. bufnr, vim.log.levels.INFO)
+    -- Disable unsupported capabilities for Godot LSP
+    client.server_capabilities.document_formatting = false
+    client.server_capabilities.document_range_formatting = false
+    client.server_capabilities.workspace = {
+      configuration = false,
+    }
     local function map(mode, lhs, rhs, desc)
       if lhs then
         vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
