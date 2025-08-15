@@ -54,6 +54,13 @@ function M.setup(opts)
         root_dir = function(fname)
           return vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd()
         end,
+        capabilities = {
+          workspace = {
+            configuration = false, -- Disable didChangeConfiguration at config level
+          },
+          documentFormattingProvider = false, -- Disable formatting
+          documentRangeFormattingProvider = false, -- Disable range formatting
+        },
       },
       docs = {
         description = "Godot LSP for GDScript",
@@ -63,6 +70,11 @@ function M.setup(opts)
       },
       on_new_config = function(new_config, new_root_dir)
         new_config.cmd = opts.cmd
+        new_config.capabilities = {
+          workspace = { configuration = false },
+          documentFormattingProvider = false,
+          documentRangeFormattingProvider = false,
+        }
       end,
     }
     vim.notify("Registered godot_lsp client with lspconfig", vim.log.levels.INFO)
@@ -74,7 +86,7 @@ function M.setup(opts)
   local on_attach = function(client, bufnr)
     godot_lsp_client_id = client.id
     vim.notify("Attached godot_lsp client (id: " .. godot_lsp_client_id .. ") to buffer " .. bufnr, vim.log.levels.INFO)
-    -- Disable unsupported capabilities for Godot LSP
+    -- Disable unsupported capabilities as a fallback
     client.server_capabilities.document_formatting = false
     client.server_capabilities.document_range_formatting = false
     client.server_capabilities.workspace = {
@@ -132,6 +144,11 @@ function M.setup(opts)
         filetypes = opts.filetypes,
         on_attach = on_attach,
         flags = { debounce_text_changes = 150 },
+        capabilities = {
+          workspace = { configuration = false },
+          documentFormattingProvider = false,
+          documentRangeFormattingProvider = false,
+        }, -- Apply capabilities at setup
         handlers = {
           ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
             if err then
@@ -151,6 +168,11 @@ function M.setup(opts)
           cmd = opts.cmd,
           on_attach = on_attach,
           root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
+          capabilities = {
+            workspace = { configuration = false },
+            documentFormattingProvider = false,
+            documentRangeFormattingProvider = false,
+          }, -- Apply to manual start
         }
         if client then
           godot_lsp_client_id = client.id
