@@ -5,7 +5,7 @@ local defaults = {
   cmd = { "ncat", "localhost", "6005" },
   filetypes = { "gdscript" },
   skip_godot_check = true,
-  debug_logging = false,
+  debug_logging = true, -- Enable debug logging to troubleshoot
   keymaps = {
     definition = "gd",
     declaration = "gD",
@@ -38,6 +38,15 @@ local godot_lsp_client_id = nil
 function M.setup(opts)
   opts = vim.tbl_deep_extend("force", defaults, opts or {})
 
+  -- Global capability override for all LSP clients
+  local default_capabilities = vim.lsp.protocol.make_client_capabilities()
+  default_capabilities.workspace = {
+    configuration = false, -- Globally disable didChangeConfiguration
+  }
+  default_capabilities.documentFormattingProvider = false
+  default_capabilities.documentRangeFormattingProvider = false
+  vim.lsp.set_client_capabilities(default_capabilities)
+
   -- Debug: Check if lspconfig is available
   local status_ok, lspconfig = pcall(require, "lspconfig")
   if not status_ok then
@@ -55,11 +64,9 @@ function M.setup(opts)
           return vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd()
         end,
         capabilities = {
-          workspace = {
-            configuration = false, -- Disable didChangeConfiguration at config level
-          },
-          documentFormattingProvider = false, -- Disable formatting
-          documentRangeFormattingProvider = false, -- Disable range formatting
+          workspace = { configuration = false },
+          documentFormattingProvider = false,
+          documentRangeFormattingProvider = false,
         },
       },
       docs = {
@@ -148,12 +155,13 @@ function M.setup(opts)
           workspace = { configuration = false },
           documentFormattingProvider = false,
           documentRangeFormattingProvider = false,
-        }, -- Apply capabilities at setup
+        },
         handlers = {
           ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
             if err then
-              vim.notify("LSP workspace config error: " .. vim.inspect(err), vim.log.levels.ERROR)
+              vim.notify("LSP ignored workspace config error: " .. vim.inspect(err), vim.log.levels.DEBUG)
             end
+            return nil -- Silently ignore the error
           end,
         },
       }
@@ -172,7 +180,7 @@ function M.setup(opts)
             workspace = { configuration = false },
             documentFormattingProvider = false,
             documentRangeFormattingProvider = false,
-          }, -- Apply to manual start
+          },
         }
         if client then
           godot_lsp_client_id = client.id
