@@ -54,7 +54,7 @@ function M.setup(opts)
   custom_capabilities.documentRangeFormattingProvider = false
 
   -- Register godot_lsp in lspconfig.configs globally (once)
-  if not lspconfig.godot_lsp then -- Check if godot_lsp is already defined
+  if not lspconfig.godot_lsp then
     lspconfig.godot_lsp = {
       default_config = {
         cmd = opts.cmd,
@@ -133,12 +133,13 @@ function M.setup(opts)
   -- Configure LSP server only if not already started
   if not godot_lsp_client_id then
     local success, err = pcall(function()
-      lspconfig.godot_lsp.setup {
+      -- Attempt to start client directly with custom capabilities
+      local client = vim.lsp.start {
+        name = "godot_lsp",
         cmd = opts.cmd,
-        filetypes = opts.filetypes,
+        root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
+        capabilities = custom_capabilities,
         on_attach = on_attach,
-        flags = { debounce_text_changes = 150 },
-        capabilities = custom_capabilities, -- Use custom capabilities here
         handlers = {
           ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
             if err then
@@ -148,23 +149,24 @@ function M.setup(opts)
           end,
         },
       }
-      local clients = vim.lsp.get_clients { name = "godot_lsp" }
-      if #clients > 0 then
-        godot_lsp_client_id = clients[1].id
-        vim.notify("Started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
-      else
-        vim.notify("Failed to start godot_lsp client, attempting manual start", vim.log.levels.WARN)
-        local client = vim.lsp.start {
-          name = "godot_lsp",
-          cmd = opts.cmd,
-          on_attach = on_attach,
-          root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
-          capabilities = custom_capabilities, -- Use custom capabilities for manual start
-        }
-        if client then
-          godot_lsp_client_id = client.id
-          vim.notify("Manually started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
+      if client then
+        godot_lsp_client_id = client.id
+        vim.notify(
+          "Started godot_lsp client (id: " .. godot_lsp_client_id .. ") with custom capabilities",
+          vim.log.levels.INFO
+        )
+        -- Attach to all existing gdscript buffers
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if vim.bo[buf].filetype == "gdscript" then
+            vim.lsp.buf_attach_client(buf, godot_lsp_client_id)
+            vim.notify(
+              "Attached buffer " .. buf .. " to godot_lsp client (id: " .. godot_lsp_client_id .. ")",
+              vim.log.levels.INFO
+            )
+          end
         end
+      else
+        vim.notify("Failed to start godot_lsp client manually", vim.log.levels.ERROR)
       end
     end)
     if not success then
@@ -307,27 +309,39 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("GodotLspStart", function()
     local success, err = pcall(function()
       if not godot_lsp_client_id then
-        lspconfig.godot_lsp.setup {
+        local client = vim.lsp.start {
+          name = "godot_lsp",
           cmd = opts.cmd,
-          filetypes = opts.filetypes,
+          root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
+          capabilities = custom_capabilities,
           on_attach = on_attach,
-          flags = { debounce_text_changes = 150 },
+          handlers = {
+            ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
+              if err then
+                vim.notify("LSP ignored workspace config error: " .. vim.inspect(err), vim.log.levels.DEBUG)
+              end
+              return nil -- Silently ignore the error
+            end,
+          },
         }
-        local clients = vim.lsp.get_clients { name = "godot_lsp" }
-        if #clients > 0 then
-          godot_lsp_client_id = clients[1].id
-          vim.notify("Started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
-        else
-          local client = vim.lsp.start {
-            name = "godot_lsp",
-            cmd = opts.cmd,
-            on_attach = on_attach,
-            root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
-          }
-          if client then
-            godot_lsp_client_id = client.id
-            vim.notify("Manually started godot_lsp client (id: " .. godot_lsp_client_id .. ")", vim.log.levels.INFO)
+        if client then
+          godot_lsp_client_id = client.id
+          vim.notify(
+            "Started godot_lsp client (id: " .. godot_lsp_client_id .. ") with custom capabilities",
+            vim.log.levels.INFO
+          )
+          -- Attach to all existing gdscript buffers
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.bo[buf].filetype == "gdscript" then
+              vim.lsp.buf_attach_client(buf, godot_lsp_client_id)
+              vim.notify(
+                "Attached buffer " .. buf .. " to godot_lsp client (id: " .. godot_lsp_client_id .. ")",
+                vim.log.levels.INFO
+              )
+            end
           end
+        else
+          vim.notify("Failed to start godot_lsp client manually", vim.log.levels.ERROR)
         end
       end
     end)
