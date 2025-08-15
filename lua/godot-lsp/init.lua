@@ -38,21 +38,20 @@ local godot_lsp_client_id = nil
 function M.setup(opts)
   opts = vim.tbl_deep_extend("force", defaults, opts or {})
 
-  -- Global capability override for all LSP clients
-  local default_capabilities = vim.lsp.protocol.make_client_capabilities()
-  default_capabilities.workspace = {
-    configuration = false, -- Globally disable didChangeConfiguration
-  }
-  default_capabilities.documentFormattingProvider = false
-  default_capabilities.documentRangeFormattingProvider = false
-  vim.lsp.set_client_capabilities(default_capabilities) -- Correct method to set capabilities
-
   -- Debug: Check if lspconfig is available
   local status_ok, lspconfig = pcall(require, "lspconfig")
   if not status_ok then
     vim.notify("nvim-lspconfig not found. Please ensure it is installed and loaded.", vim.log.levels.ERROR)
     return
   end
+
+  -- Custom capabilities for Godot LSP
+  local custom_capabilities = vim.lsp.protocol.make_client_capabilities()
+  custom_capabilities.workspace = {
+    configuration = false, -- Disable didChangeConfiguration
+  }
+  custom_capabilities.documentFormattingProvider = false
+  custom_capabilities.documentRangeFormattingProvider = false
 
   -- Register godot_lsp in lspconfig.configs globally (once)
   if not lspconfig.configs.godot_lsp then
@@ -63,11 +62,7 @@ function M.setup(opts)
         root_dir = function(fname)
           return vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd()
         end,
-        capabilities = {
-          workspace = { configuration = false },
-          documentFormattingProvider = false,
-          documentRangeFormattingProvider = false,
-        },
+        capabilities = custom_capabilities, -- Use custom capabilities
       },
       docs = {
         description = "Godot LSP for GDScript",
@@ -77,11 +72,7 @@ function M.setup(opts)
       },
       on_new_config = function(new_config, new_root_dir)
         new_config.cmd = opts.cmd
-        new_config.capabilities = {
-          workspace = { configuration = false },
-          documentFormattingProvider = false,
-          documentRangeFormattingProvider = false,
-        }
+        new_config.capabilities = custom_capabilities -- Apply custom capabilities to new configs
       end,
     }
     vim.notify("Registered godot_lsp client with lspconfig", vim.log.levels.INFO)
@@ -151,11 +142,7 @@ function M.setup(opts)
         filetypes = opts.filetypes,
         on_attach = on_attach,
         flags = { debounce_text_changes = 150 },
-        capabilities = {
-          workspace = { configuration = false },
-          documentFormattingProvider = false,
-          documentRangeFormattingProvider = false,
-        },
+        capabilities = custom_capabilities, -- Use custom capabilities here
         handlers = {
           ["workspace/didChangeConfiguration"] = function(err, result, ctx, config)
             if err then
@@ -176,11 +163,7 @@ function M.setup(opts)
           cmd = opts.cmd,
           on_attach = on_attach,
           root_dir = vim.fs.dirname(vim.fs.find({ "project.godot" }, { upward = true })[1]) or vim.fn.getcwd(),
-          capabilities = {
-            workspace = { configuration = false },
-            documentFormattingProvider = false,
-            documentRangeFormattingProvider = false,
-          },
+          capabilities = custom_capabilities, -- Use custom capabilities for manual start
         }
         if client then
           godot_lsp_client_id = client.id
