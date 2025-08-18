@@ -53,6 +53,24 @@ This document provides detailed steps to diagnose and resolve common issues with
     -   Ensure **Exec Path** in Godot uses the full path (e.g., `/Users/<your-username>/.local/bin/open-nvim-godot.sh`), not `~/.local/bin/open-nvim-godot.sh`.
     -   Check Godot's output console for errors.
 
+### Error on Save: "Method not found: godot/reloadScript"
+
+- **Cause:** Saving a `.gd` file triggers Neovim to send a `godot/reloadScript` request, which Godot's LSP does not support (error code `-32601`).
+- **Steps:**
+  - Check the LSP log with `:LspLog` or `~/.cache/nvim/godot-lsp.log` (enable `debug_logging = true`).
+  - Update your `godot-lsp.nvim` setup to disable the save handler:
+    ```lua
+    require("godot-lsp").setup {
+      cmd = { "ncat", "localhost", "6005" },
+      filetypes = { "gdscript" },
+      skip_godot_check = true,
+      debug_logging = true,
+      on_attach = function(client, bufnr)
+        client.handlers["textDocument/didSave"] = function() end -- Override default save handler
+      end,
+    }
+    ```
+
 ### 🪲 DAP Debugging Issues
 
 -   **Cause:** nvim-dap or Godot's remote debugging may not be configured correctly.
