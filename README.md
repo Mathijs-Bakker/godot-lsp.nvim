@@ -1,4 +1,5 @@
-<div align="center"><img src="assets/logo_godot-lsp-nvim.svg" width="300"></div>
+## This project is archived, 
+### there's a better solution here: [godotdev.nvim](https://github.com/Mathijs-Bakker/godotdev.nvim)
 
 # godot-lsp.nvim
 
